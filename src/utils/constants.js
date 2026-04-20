@@ -1,5 +1,5 @@
-export const API_BASE_URL    = process.env.REACT_APP_API_BASE_URL    || 'http://localhost:8080/api';
-export const STATIC_BASE_URL = process.env.REACT_APP_STATIC_BASE_URL || 'http://localhost:8080';
+export const API_BASE_URL    = process.env.REACT_APP_API_BASE_URL    || 'https://jk-motors-backend-x1tg.vercel.app/api';
+export const STATIC_BASE_URL = process.env.REACT_APP_STATIC_BASE_URL || 'https://jk-motors-backend-x1tg.vercel.app';
 export const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
 
 export const USER_ROLES = { ADMIN: 'ADMIN', CLIENT: 'CLIENT' };
