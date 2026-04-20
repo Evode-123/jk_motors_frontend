@@ -6,8 +6,8 @@ import apiService from '../services/apiService';
 
 const CONTACT_INFO = [
   { icon: '📍', label: 'Address',  value: 'Toronto, Ontario, Canada' },
-  { icon: '📞', label: 'Phone',    value: '+1 (416) 555-0192' },
-  { icon: '💬', label: 'WhatsApp', value: '+1 (416) 555-0192' },
+  { icon: '📞', label: 'Phone',    value: '+1 (438) 979-2548' },
+  { icon: '💬', label: 'WhatsApp', value: '+1 (438) 979-2548' },
   { icon: '📧', label: 'Email',    value: 'info@jkmotors.ca' },
   { icon: '🕐', label: 'Hours',    value: 'Mon–Sat: 8:00AM – 6:00PM EST' },
 ];
