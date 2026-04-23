@@ -5,7 +5,20 @@ import {
 } from 'lucide-react';
 import apiService from '../../services/apiService';
 
-// ── Tiny helpers ───────────────────────────────────────────────────────────────
+const G = {
+  gold:        '#C9A84C',
+  goldLight:   '#E8C96A',
+  goldDim:     'rgba(201,168,76,0.18)',
+  goldDimmer:  'rgba(201,168,76,0.09)',
+  textPrimary: '#F5E4B8',
+  textMuted:   'rgba(168,136,72,0.75)',
+  border:      'rgba(201,168,76,0.16)',
+  surface:     'rgba(28,22,9,0.6)',
+};
+
+const FONT  = { fontFamily: "'DM Sans', sans-serif" };
+const SERIF = { fontFamily: "'Playfair Display', serif" };
+
 const fmt = (iso) =>
   new Date(iso).toLocaleString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric',
@@ -14,8 +27,8 @@ const fmt = (iso) =>
 
 const JKCard = ({ children, style = {} }) => (
   <div style={{
-    background: 'rgba(30,61,110,0.4)',
-    border: '1px solid rgba(14,165,233,0.15)',
+    background: G.surface,
+    border: `1px solid ${G.border}`,
     borderRadius: 16,
     ...style,
   }}>
@@ -23,14 +36,13 @@ const JKCard = ({ children, style = {} }) => (
   </div>
 );
 
-// ── Main Component ─────────────────────────────────────────────────────────────
 export default function AdminContactMessages() {
   const [messages,  setMessages]  = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [search,    setSearch]    = useState('');
-  const [filter,    setFilter]    = useState('all'); // 'all' | 'unread' | 'read'
-  const [expanded,  setExpanded]  = useState(null);  // id of expanded row
-  const [deleting,  setDeleting]  = useState(null);  // id being deleted
+  const [filter,    setFilter]    = useState('all');
+  const [expanded,  setExpanded]  = useState(null);
+  const [deleting,  setDeleting]  = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -42,7 +54,7 @@ export default function AdminContactMessages() {
       const data = await apiService.adminGetContacts({ isRead });
       setMessages(data || []);
     } catch {
-      // keep previous state on error
+      // keep previous state
     } finally {
       setLoading(false);
     }
@@ -50,17 +62,13 @@ export default function AdminContactMessages() {
 
   useEffect(() => { load(); }, [load]);
 
-  // When a row is expanded, auto-mark it as read
   const handleExpand = async (msg) => {
     const isExpanding = expanded !== msg.id;
     setExpanded(isExpanding ? msg.id : null);
-
     if (isExpanding && !msg.isRead) {
       try {
         await apiService.adminMarkContactRead(msg.id, true);
-        setMessages(prev =>
-          prev.map(m => m.id === msg.id ? { ...m, isRead: true } : m)
-        );
+        setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isRead: true } : m));
       } catch {}
     }
   };
@@ -70,9 +78,7 @@ export default function AdminContactMessages() {
     try {
       const newVal = !msg.isRead;
       await apiService.adminMarkContactRead(msg.id, newVal);
-      setMessages(prev =>
-        prev.map(m => m.id === msg.id ? { ...m, isRead: newVal } : m)
-      );
+      setMessages(prev => prev.map(m => m.id === msg.id ? { ...m, isRead: newVal } : m));
     } catch {}
   };
 
@@ -95,7 +101,6 @@ export default function AdminContactMessages() {
     setDeleting(null);
   };
 
-  // Client-side search filter
   const filtered = messages.filter(m => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
@@ -109,52 +114,48 @@ export default function AdminContactMessages() {
 
   const unreadCount = messages.filter(m => !m.isRead).length;
 
-  const headStyle = { fontFamily: "'Space Grotesk', sans-serif", color: '#e2e8f0' };
-  const subStyle  = { fontFamily: "'Space Grotesk', sans-serif", color: '#64748b', fontSize: 12 };
-
   return (
-    <div className="space-y-5">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <style>{`@keyframes jk-spin { to { transform: rotate(360deg); } }`}</style>
 
-      {/* ── Header ── */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
+      {/* Header */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
         <div>
-          <h1 style={{ ...headStyle, fontSize: 22, fontWeight: 900, marginBottom: 4 }}>
+          <h1 style={{ ...SERIF, fontSize: 22, fontWeight: 700, color: G.textPrimary, marginBottom: 4 }}>
             Contact Messages
           </h1>
-          <p style={subStyle}>
+          <p style={{ ...FONT, fontSize: 13, color: G.textMuted }}>
             {messages.length} total &nbsp;·&nbsp;
-            <span style={{ color: unreadCount > 0 ? '#f59e0b' : '#64748b' }}>
+            <span style={{ color: unreadCount > 0 ? G.gold : G.textMuted }}>
               {unreadCount} unread
             </span>
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           {unreadCount > 0 && (
             <button
               onClick={handleMarkAllRead}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
               style={{
-                background: 'rgba(16,185,129,0.1)',
-                border: '1px solid rgba(16,185,129,0.25)',
-                color: '#10b981',
-                cursor: 'pointer',
-                fontFamily: "'Space Grotesk', sans-serif",
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '8px 14px', borderRadius: 10,
+                background: 'rgba(34,120,80,0.12)',
+                border: '1px solid rgba(34,120,80,0.3)',
+                color: '#6ee7b7', cursor: 'pointer',
+                ...FONT, fontSize: 12, fontWeight: 600,
               }}
             >
-              <CheckCheck className="w-3.5 h-3.5" />
-              Mark all read
+              <CheckCheck className="w-3.5 h-3.5" /> Mark all read
             </button>
           )}
           <button
             onClick={load}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold"
             style={{
-              background: 'rgba(14,165,233,0.08)',
-              border: '1px solid rgba(14,165,233,0.2)',
-              color: '#38bdf8',
-              cursor: 'pointer',
-              fontFamily: "'Space Grotesk', sans-serif",
+              display: 'flex', alignItems: 'center', gap: 6,
+              padding: '8px 14px', borderRadius: 10,
+              background: G.goldDimmer, border: `1px solid ${G.border}`,
+              color: G.gold, cursor: 'pointer',
+              ...FONT, fontSize: 12, fontWeight: 600,
             }}
           >
             <RefreshCw className="w-3.5 h-3.5" /> Refresh
@@ -162,11 +163,10 @@ export default function AdminContactMessages() {
         </div>
       </div>
 
-      {/* ── Filters + Search ── */}
-      <div className="flex flex-wrap gap-3 items-center">
-        {/* Filter tabs */}
-        <div className="flex rounded-xl overflow-hidden"
-          style={{ border: '1px solid rgba(14,165,233,0.15)', background: 'rgba(14,165,233,0.04)' }}>
+      {/* Filters + Search */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
+        {/* Filter pills */}
+        <div style={{ display: 'flex', borderRadius: 12, overflow: 'hidden', border: `1px solid ${G.border}`, background: G.goldDimmer }}>
           {[
             { value: 'all',    label: 'All' },
             { value: 'unread', label: 'Unread' },
@@ -176,17 +176,13 @@ export default function AdminContactMessages() {
               key={tab.value}
               onClick={() => setFilter(tab.value)}
               style={{
-                padding: '6px 16px',
-                fontSize: 12,
-                fontWeight: 600,
-                fontFamily: "'Space Grotesk', sans-serif",
+                padding: '7px 18px', fontSize: 12, fontWeight: 600,
+                ...FONT,
                 background: filter === tab.value
-                  ? 'linear-gradient(135deg,#0EA5E9,#6366F1)'
+                  ? 'linear-gradient(135deg,#8B6914,#C9A84C)'
                   : 'transparent',
-                color: filter === tab.value ? '#fff' : '#94a3b8',
-                border: 'none',
-                cursor: 'pointer',
-                transition: 'all 0.15s',
+                color: filter === tab.value ? '#1C1609' : G.textMuted,
+                border: 'none', cursor: 'pointer', transition: 'all 0.15s',
               }}
             >
               {tab.label}
@@ -195,43 +191,35 @@ export default function AdminContactMessages() {
         </div>
 
         {/* Search */}
-        <div className="relative flex-1" style={{ minWidth: 200 }}>
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-            style={{ color: '#475569', pointerEvents: 'none' }} />
+        <div style={{ position: 'relative', flex: 1, minWidth: 200 }}>
+          <Search className="w-4 h-4" style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: G.gold, pointerEvents: 'none' }} />
           <input
             type="text"
             placeholder="Search name, email, message…"
             value={search}
             onChange={e => setSearch(e.target.value)}
             style={{
-              width: '100%',
-              paddingLeft: 36,
-              paddingRight: 12,
-              paddingTop: 8,
-              paddingBottom: 8,
-              background: 'rgba(14,165,233,0.04)',
-              border: '1px solid rgba(14,165,233,0.15)',
-              borderRadius: 12,
-              color: '#e2e8f0',
-              fontSize: 13,
-              fontFamily: "'Space Grotesk', sans-serif",
-              outline: 'none',
+              width: '100%', paddingLeft: 36, paddingRight: 12,
+              paddingTop: 9, paddingBottom: 9,
+              background: 'rgba(20,16,8,0.8)',
+              border: `1px solid ${G.goldDim}`,
+              borderRadius: 12, color: G.textPrimary, fontSize: 13,
+              ...FONT, outline: 'none',
             }}
           />
         </div>
       </div>
 
-      {/* ── Message List ── */}
+      {/* Message List */}
       <JKCard>
         {loading ? (
-          <div className="flex items-center justify-center py-16">
-            <div className="w-6 h-6 rounded-full border-2 animate-spin"
-              style={{ borderColor: 'rgba(14,165,233,0.2)', borderTopColor: '#0EA5E9' }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 64 }}>
+            <div style={{ width: 24, height: 24, borderRadius: '50%', border: `2px solid ${G.goldDimmer}`, borderTopColor: G.gold, animation: 'jk-spin 0.8s linear infinite' }} />
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-16">
-            <Mail className="w-10 h-10 mx-auto mb-3" style={{ color: '#1e3d6e' }} />
-            <p style={{ ...subStyle, fontSize: 13 }}>
+          <div style={{ textAlign: 'center', padding: '64px 24px' }}>
+            <Mail className="w-10 h-10 mx-auto mb-3" style={{ color: G.goldDim }} />
+            <p style={{ ...FONT, fontSize: 13, color: G.textMuted }}>
               {search ? 'No messages match your search.' : 'No messages yet.'}
             </p>
           </div>
@@ -239,146 +227,119 @@ export default function AdminContactMessages() {
           <div>
             {filtered.map((msg, idx) => {
               const isOpen = expanded === msg.id;
-
               return (
-                <div key={msg.id}
-                  style={{ borderBottom: idx < filtered.length - 1 ? '1px solid rgba(14,165,233,0.07)' : 'none' }}>
+                <div key={msg.id} style={{ borderBottom: idx < filtered.length - 1 ? `1px solid rgba(201,168,76,0.07)` : 'none' }}>
 
-                  {/* ── Row header (always visible) ── */}
+                  {/* Row header */}
                   <div
-                    className="flex items-start gap-3 px-5 py-4 cursor-pointer"
-                    style={{ background: isOpen ? 'rgba(14,165,233,0.04)' : 'transparent', transition: 'background 0.15s' }}
+                    style={{
+                      display: 'flex', alignItems: 'flex-start', gap: 12,
+                      padding: '14px 20px', cursor: 'pointer',
+                      background: isOpen ? G.goldDimmer : 'transparent',
+                      transition: 'background 0.15s',
+                    }}
                     onClick={() => handleExpand(msg)}
+                    onMouseEnter={e => { if (!isOpen) e.currentTarget.style.background = 'rgba(201,168,76,0.05)'; }}
+                    onMouseLeave={e => { if (!isOpen) e.currentTarget.style.background = 'transparent'; }}
                   >
-                    {/* Unread dot + icon */}
-                    <div className="relative flex-shrink-0 mt-0.5">
+                    {/* Icon + unread dot */}
+                    <div style={{ position: 'relative', flexShrink: 0, marginTop: 2 }}>
                       {!msg.isRead && (
-                        <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full"
-                          style={{ background: '#f59e0b', border: '2px solid #0F2644' }} />
+                        <span style={{ position: 'absolute', top: -2, right: -2, width: 8, height: 8, borderRadius: '50%', background: G.gold, border: `2px solid #100D05` }} />
                       )}
                       {msg.isRead
-                        ? <MailOpen className="w-5 h-5" style={{ color: '#475569' }} />
-                        : <Mail     className="w-5 h-5" style={{ color: '#38bdf8' }} />}
+                        ? <MailOpen className="w-5 h-5" style={{ color: G.textMuted }} />
+                        : <Mail     className="w-5 h-5" style={{ color: G.gold }} />}
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
                         <span style={{
-                          fontFamily: "'Space Grotesk', sans-serif",
-                          fontSize: 14,
+                          ...FONT, fontSize: 14,
                           fontWeight: msg.isRead ? 400 : 600,
-                          color: msg.isRead ? '#94a3b8' : '#e2e8f0',
+                          color: msg.isRead ? G.textMuted : G.textPrimary,
                         }}>
                           {msg.name}
                         </span>
-                        <span style={{ ...subStyle, fontSize: 11 }}>
+                        <span style={{ ...FONT, fontSize: 11, color: G.textMuted }}>
                           &lt;{msg.email}&gt;
                         </span>
                         {msg.phone && (
-                          <span className="flex items-center gap-1"
-                            style={{ ...subStyle, fontSize: 11 }}>
+                          <span style={{ display: 'flex', alignItems: 'center', gap: 4, ...FONT, fontSize: 11, color: G.textMuted }}>
                             <Phone className="w-3 h-3" />{msg.phone}
                           </span>
                         )}
                       </div>
-                      {/* Message preview when collapsed */}
                       {!isOpen && (
                         <p style={{
-                          fontFamily: "'Space Grotesk', sans-serif",
-                          fontSize: 12,
-                          color: '#64748b',
-                          overflow: 'hidden',
-                          whiteSpace: 'nowrap',
-                          textOverflow: 'ellipsis',
-                          maxWidth: '100%',
+                          ...FONT, fontSize: 12, color: G.textMuted,
+                          overflow: 'hidden', whiteSpace: 'nowrap',
+                          textOverflow: 'ellipsis', maxWidth: '100%',
                         }}>
                           {msg.message}
                         </p>
                       )}
                     </div>
 
-                    {/* Right side: date + actions */}
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="flex items-center gap-1" style={subStyle}>
-                        <Clock className="w-3 h-3" />
-                        {fmt(msg.createdAt)}
+                    {/* Right side actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 4, ...FONT, fontSize: 11, color: G.textMuted }}>
+                        <Clock className="w-3 h-3" />{fmt(msg.createdAt)}
                       </span>
 
-                      {/* Mark read/unread toggle */}
                       <button
                         onClick={e => handleMarkRead(e, msg)}
                         title={msg.isRead ? 'Mark as unread' : 'Mark as read'}
-                        className="p-1.5 rounded-lg transition-colors"
-                        style={{
-                          background: 'rgba(14,165,233,0.06)',
-                          border: '1px solid rgba(14,165,233,0.12)',
-                          color: '#38bdf8',
-                          cursor: 'pointer',
-                        }}
+                        style={{ padding: '6px', borderRadius: 8, background: G.goldDimmer, border: `1px solid ${G.border}`, color: G.gold, cursor: 'pointer' }}
                       >
                         {msg.isRead
                           ? <Mail     className="w-3.5 h-3.5" />
                           : <MailOpen className="w-3.5 h-3.5" />}
                       </button>
 
-                      {/* Delete */}
                       <button
                         onClick={e => handleDelete(e, msg.id)}
                         disabled={deleting === msg.id}
                         title="Delete message"
-                        className="p-1.5 rounded-lg transition-colors"
-                        style={{
-                          background: 'rgba(239,68,68,0.06)',
-                          border: '1px solid rgba(239,68,68,0.12)',
-                          color: '#f87171',
-                          cursor: 'pointer',
-                          opacity: deleting === msg.id ? 0.5 : 1,
-                        }}
+                        style={{ padding: '6px', borderRadius: 8, background: 'rgba(180,60,40,0.08)', border: '1px solid rgba(180,60,40,0.15)', color: '#f87171', cursor: 'pointer', opacity: deleting === msg.id ? 0.5 : 1 }}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
 
-                      {/* Expand chevron */}
                       {isOpen
-                        ? <ChevronUp   className="w-4 h-4" style={{ color: '#38bdf8' }} />
-                        : <ChevronDown className="w-4 h-4" style={{ color: '#475569' }} />}
+                        ? <ChevronUp   className="w-4 h-4" style={{ color: G.gold }} />
+                        : <ChevronDown className="w-4 h-4" style={{ color: G.textMuted }} />}
                     </div>
                   </div>
 
-                  {/* ── Expanded message body ── */}
+                  {/* Expanded body */}
                   {isOpen && (
-                    <div className="px-14 pb-5"
-                      style={{ borderTop: '1px solid rgba(14,165,233,0.07)' }}>
-                      <div className="rounded-xl p-4 mt-3"
-                        style={{ background: 'rgba(14,165,233,0.04)', border: '1px solid rgba(14,165,233,0.08)' }}>
-                        <p style={{
-                          fontFamily: "'Space Grotesk', sans-serif",
-                          fontSize: 14,
-                          color: '#cbd5e1',
-                          lineHeight: 1.7,
-                          whiteSpace: 'pre-wrap',
-                          margin: 0,
-                        }}>
+                    <div style={{ padding: '0 20px 20px 52px', borderTop: `1px solid rgba(201,168,76,0.07)` }}>
+                      <div style={{
+                        borderRadius: 12, padding: '14px 16px', marginTop: 12,
+                        background: 'rgba(20,16,8,0.6)',
+                        border: `1px solid ${G.goldDim}`,
+                      }}>
+                        <p style={{ ...FONT, fontSize: 14, color: G.textPrimary, lineHeight: 1.7, whiteSpace: 'pre-wrap', margin: 0 }}>
                           {msg.message}
                         </p>
                       </div>
 
-                      {/* Quick reply shortcut */}
-                      <div className="mt-3 flex items-center gap-3">
+                      <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 12 }}>
                         <a
                           href={`mailto:${msg.email}?subject=Re: Your message to JK Motors`}
-                          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-white"
                           style={{
-                            background: 'linear-gradient(135deg,#0EA5E9,#6366F1)',
-                            textDecoration: 'none',
-                            fontFamily: "'Space Grotesk', sans-serif",
+                            display: 'flex', alignItems: 'center', gap: 6,
+                            padding: '8px 18px', borderRadius: 10,
+                            background: 'linear-gradient(135deg,#8B6914,#C9A84C)',
+                            color: '#1C1609', textDecoration: 'none',
+                            ...FONT, fontSize: 13, fontWeight: 600,
                           }}
                         >
-                          <Mail className="w-3.5 h-3.5" />
-                          Reply via Email
+                          <Mail className="w-3.5 h-3.5" /> Reply via Email
                         </a>
-                        <span style={subStyle}>Sent to: {msg.email}</span>
+                        <span style={{ ...FONT, fontSize: 12, color: G.textMuted }}>Sent to: {msg.email}</span>
                       </div>
                     </div>
                   )}
