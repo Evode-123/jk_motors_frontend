@@ -107,9 +107,10 @@ const DashboardLayout = ({ children }) => {
     { icon: <Wrench          className="w-5 h-5" />, label: 'Services',        path: '/services' },
     { icon: <Package         className="w-5 h-5" />, label: 'Service Catalog', path: '/admin/catalog' },
     { icon: <MessageSquare   className="w-5 h-5" />, label: 'Feedback',        path: '/admin/feedback', badge: adminFeedbackUnread },
-    { icon: <Users           className="w-5 h-5" />, label: 'Users',           path: '/admin/users' },
+    { icon: <MessageCircle   className="w-5 h-5" />, label: 'Contact Messages', path: '/admin/contact-messages' },
     { icon: <BarChart2       className="w-5 h-5" />, label: 'Analytics',       path: '/admin/analytics' },
     { icon: <Bell            className="w-5 h-5" />, label: 'Notifications',   path: '/notifications', badge: unreadCount },
+    { icon: <Users           className="w-5 h-5" />, label: 'Users',           path: '/admin/users' },
   ];
 
   const clientMenu = [

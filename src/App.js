@@ -42,6 +42,7 @@ import AdminAnalytics         from './components/admin/AdminAnalytics';  // ← 
 
 import FeedbackPage       from './components/feedback/FeedbackPage';
 import AdminFeedbackPage  from './components/admin/AdminFeedbackPage';
+import AdminContactMessages from './components/admin/AdminContactMessages';
 
 // ── PageTracker — fires analytics event on every route change ─────────────────
 // Must live INSIDE <BrowserRouter> and <AuthProvider> so it can access both
@@ -146,6 +147,15 @@ const App = () => (
          <ProtectedRoute adminOnly>
            <DashboardLayout>
              <AdminFeedbackPage />
+           </DashboardLayout>
+         </ProtectedRoute>
+       } />
+
+       {/* ── Admin: Contact messages ─────────────────────────────────── */}
+      <Route path="/admin/contact-messages" element={
+         <ProtectedRoute adminOnly>
+           <DashboardLayout>
+             <AdminContactMessages />
            </DashboardLayout>
          </ProtectedRoute>
        } />
