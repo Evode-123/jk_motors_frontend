@@ -1,24 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ShoppingCart, Package, Bell, Users, Clock, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
+import { ShoppingCart, Package, Users, LayoutDashboard, Clock, CheckCircle, AlertCircle, TrendingUp } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { USER_ROLES, ORDER_STATUS, STATUS_COLORS } from '../../utils/constants';
 import apiService from '../../services/apiService';
 
-// ── Shared JK-themed sub-components ──────────────────────────────────────────
+const G = {
+  gold:        '#C9A84C',
+  goldLight:   '#E8C96A',
+  goldDim:     'rgba(201,168,76,0.18)',
+  goldDimmer:  'rgba(201,168,76,0.10)',
+  bg:          '#0A0804',
+  surface:     '#100D05',
+  surface2:    '#181308',
+  textPrimary: '#F5E4B8',
+  textMuted:   'rgba(168,136,72,0.75)',
+  border:      'rgba(201,168,76,0.16)',
+};
 
-const JKCard = ({ children, className = '', style = {}, onClick }) => (
-  <div
-    onClick={onClick}
-    className={className}
-    style={{
-      background: 'rgba(30,61,110,0.4)',
-      border: '1px solid rgba(14,165,233,0.15)',
-      borderRadius: 16,
-      ...style,
-      ...(onClick ? { cursor: 'pointer' } : {}),
-    }}
-  >
+const CARD = {
+  background:   'rgba(28,22,9,0.6)',
+  border:       '1px solid rgba(201,168,76,0.16)',
+  borderRadius: 16,
+  padding:      20,
+};
+
+const FONT  = { fontFamily: "'DM Sans', sans-serif" };
+const SERIF = { fontFamily: "'Playfair Display', serif" };
+const LABEL = { ...FONT, fontSize: 11, color: G.textMuted, textTransform: 'uppercase', letterSpacing: '0.08em', marginTop: 4 };
+
+const JKCard = ({ children, style = {}, onClick }) => (
+  <div onClick={onClick} style={{ ...CARD, ...style, ...(onClick ? { cursor: 'pointer' } : {}) }}>
     {children}
   </div>
 );
@@ -27,20 +39,14 @@ const StatusPill = ({ status }) => {
   const colors = STATUS_COLORS[status] || STATUS_COLORS.PENDING;
   return (
     <span style={{
-      padding: '3px 10px',
-      borderRadius: 20,
-      fontSize: 11,
-      fontWeight: 600,
-      background: colors.bg,
-      color: colors.text,
-      border: `1px solid ${colors.border}`,
+      padding: '3px 10px', borderRadius: 20, fontSize: 11, fontWeight: 600,
+      background: colors.bg, color: colors.text, border: `1px solid ${colors.border}`,
+      fontFamily: "'DM Sans', sans-serif",
     }}>
       {status}
     </span>
   );
 };
-
-// ── Main Component ────────────────────────────────────────────────────────────
 
 export default function DashboardContent() {
   const { user }  = useAuth();
@@ -71,116 +77,91 @@ export default function DashboardContent() {
 
   const displayName = user?.firstName || user?.email?.split('@')[0] || 'there';
 
-  // ── Smart navigation: first-time users (no orders) go to /services ─────────
-  // Users with existing orders can go directly to /order/new
   const handleNewOrder = () => {
-    if (!loading && orders.length === 0) {
-      navigate('/services');
-    } else {
-      navigate('/order/new');
-    }
+    if (!loading && orders.length === 0) navigate('/services');
+    else navigate('/order/new');
   };
 
-  const headingStyle = { fontFamily: "'Orbitron', sans-serif", color: '#e2e8f0' };
-  const subStyle = { fontFamily: "'Space Grotesk', sans-serif", color: '#64748b', fontSize: 13 };
-  const labelStyle = { fontFamily: "'Space Grotesk', sans-serif", color: '#94a3b8', fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.08em' };
-
-  // ── ADMIN ────────────────────────────────────────────────────────────────
+  const Spinner = () => (
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}>
+      <div style={{ width: 28, height: 28, borderRadius: '50%', border: `2px solid ${G.goldDim}`, borderTopColor: G.gold, animation: 'jk-spin 0.8s linear infinite' }} />
+    </div>
+  );
 
   if (isAdmin) {
     const stats = [
-      { label: 'Total Orders',    value: orders.length,                         icon: <ShoppingCart className="w-5 h-5" />, color: '#0EA5E9', click: () => navigate('/admin/orders') },
-      { label: 'Pending Review',  value: countByStatus(ORDER_STATUS.PENDING),   icon: <Clock className="w-5 h-5" />,        color: '#f59e0b', click: () => navigate('/admin/orders') },
-      { label: 'Awaiting Client', value: countByStatus(ORDER_STATUS.APPROVED),  icon: <AlertCircle className="w-5 h-5" />,  color: '#6366F1', click: () => navigate('/admin/orders') },
-      { label: 'Completed',       value: countByStatus(ORDER_STATUS.COMPLETED), icon: <CheckCircle className="w-5 h-5" />,  color: '#10b981', click: () => navigate('/admin/orders') },
+      { label: 'Total Orders',    value: orders.length,                         icon: <ShoppingCart className="w-5 h-5" />, color: G.gold },
+      { label: 'Pending Review',  value: countByStatus(ORDER_STATUS.PENDING),   icon: <Clock className="w-5 h-5" />,        color: '#E8C96A' },
+      { label: 'Awaiting Client', value: countByStatus(ORDER_STATUS.APPROVED),  icon: <AlertCircle className="w-5 h-5" />,  color: '#C9A84C' },
+      { label: 'Completed',       value: countByStatus(ORDER_STATUS.COMPLETED), icon: <CheckCircle className="w-5 h-5" />,  color: '#6ee7b7' },
     ];
 
     return (
-      <div className="space-y-6">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <style>{`@keyframes jk-spin { to { transform: rotate(360deg); } }`}</style>
         <div>
-          <h1 style={{ ...headingStyle, fontSize: 22, fontWeight: 900, marginBottom: 4 }}>
+          <h1 style={{ ...SERIF, fontSize: 24, fontWeight: 700, color: G.textPrimary, marginBottom: 4 }}>
             {getGreeting()}, {displayName} 👋
           </h1>
-          <p style={subStyle}>Here's what's happening with JK Motors today.</p>
+          <p style={{ ...FONT, fontSize: 13, color: G.textMuted }}>Here's what's happening with JK Motors today.</p>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(150px,1fr))', gap: 14 }}>
           {stats.map((s, i) => (
-            <JKCard key={i} onClick={s.click} style={{ padding: 20, transition: 'all 0.2s' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(14,165,233,0.35)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(14,165,233,0.15)'}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center"
-                  style={{ background: `${s.color}18`, color: s.color, border: `1px solid ${s.color}30` }}>
-                  {s.icon}
-                </div>
-                <TrendingUp className="w-4 h-4" style={{ color: '#1e3d6e' }} />
+            <JKCard key={i} onClick={() => navigate('/admin/orders')}
+              style={{ transition: 'border-color 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = G.goldDim}
+              onMouseLeave={e => e.currentTarget.style.borderColor = G.border}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `${s.color}18`, color: s.color, border: `1px solid ${s.color}30`, marginBottom: 12 }}>
+                {s.icon}
               </div>
-              <div style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 28, fontWeight: 900, color: '#e2e8f0' }}>
-                {loading ? '—' : s.value}
-              </div>
-              <div style={labelStyle}>{s.label}</div>
+              <div style={{ ...SERIF, fontSize: 28, fontWeight: 700, color: G.textPrimary }}>{loading ? '—' : s.value}</div>
+              <div style={LABEL}>{s.label}</div>
             </JKCard>
           ))}
         </div>
 
         {/* Quick actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 14 }}>
           {[
-            { label: 'Manage Orders',   icon: <ShoppingCart className="w-5 h-5" />, path: '/admin/orders',  color: '#0EA5E9' },
-            { label: 'Service Catalog', icon: <Package      className="w-5 h-5" />, path: '/admin/catalog', color: '#6366F1' },
-            { label: 'Manage Users',    icon: <Users        className="w-5 h-5" />, path: '/admin/users',   color: '#10b981' },
+            { label: 'Manage Orders',   icon: <ShoppingCart className="w-5 h-5" />, path: '/admin/orders',  color: G.gold },
+            { label: 'Service Catalog', icon: <Package      className="w-5 h-5" />, path: '/admin/catalog', color: '#E8C96A' },
+            { label: 'Manage Users',    icon: <Users        className="w-5 h-5" />, path: '/admin/users',   color: '#A07830' },
           ].map(a => (
-            <JKCard key={a.path} onClick={() => navigate(a.path)}
-              style={{ padding: 20, display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer', transition: 'all 0.2s' }}>
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-white flex-shrink-0"
-                style={{ background: `linear-gradient(135deg,${a.color},${a.color}99)`, boxShadow: `0 4px 14px ${a.color}30` }}>
+            <JKCard key={a.path} onClick={() => navigate(a.path)} style={{ display: 'flex', alignItems: 'center', gap: 16, transition: 'border-color 0.2s' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = G.goldDim}
+              onMouseLeave={e => e.currentTarget.style.borderColor = G.border}>
+              <div style={{ width: 44, height: 44, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1C1609', flexShrink: 0, background: `linear-gradient(135deg,${a.color}cc,${a.color})` }}>
                 {a.icon}
               </div>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 600, color: '#e2e8f0' }}>
-                {a.label}
-              </span>
+              <span style={{ ...FONT, fontSize: 14, fontWeight: 500, color: G.textPrimary }}>{a.label}</span>
             </JKCard>
           ))}
         </div>
 
         {/* Recent orders */}
-        <JKCard>
-          <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(14,165,233,0.1)' }}>
-            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 600, color: '#e2e8f0' }}>Recent Orders</h3>
+        <JKCard style={{ padding: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${G.border}` }}>
+            <h3 style={{ ...FONT, fontSize: 14, fontWeight: 600, color: G.textPrimary }}>Recent Orders</h3>
             <button onClick={() => navigate('/admin/orders')}
-              style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: '#38bdf8', background: 'none', border: 'none', cursor: 'pointer' }}>
-              View all →
-            </button>
+              style={{ ...FONT, fontSize: 12, color: G.gold, background: 'none', border: 'none', cursor: 'pointer' }}>View all →</button>
           </div>
-          {loading ? (
-            <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(14,165,233,0.2)', borderTopColor: '#0EA5E9' }} />
-            </div>
-          ) : orders.length === 0 ? (
-            <div className="text-center py-12" style={{ color: '#475569', fontFamily: "'Space Grotesk', sans-serif", fontSize: 13 }}>No orders yet</div>
+          {loading ? <Spinner /> : orders.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 0', ...FONT, color: G.textMuted, fontSize: 13 }}>No orders yet</div>
           ) : (
             <div>
               {orders.slice(0, 5).map(order => (
-                <div key={order.id} className="flex items-center justify-between px-5 py-3"
-                  style={{ borderBottom: '1px solid rgba(14,165,233,0.06)' }}
-                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(14,165,233,0.04)'}
+                <div key={order.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: `1px solid rgba(201,168,76,0.07)`, transition: 'background 0.15s', cursor: 'pointer' }}
+                  onMouseEnter={e => e.currentTarget.style.background = G.goldDimmer}
                   onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                   <div>
-                    <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
-                      {order.clientFirstName} {order.clientLastName}
-                    </p>
-                    <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: '#64748b' }}>
-                      {order.service?.name ?? 'Service Request'}
-                    </p>
+                    <p style={{ ...FONT, fontSize: 13, fontWeight: 500, color: G.textPrimary }}>{order.clientFirstName} {order.clientLastName}</p>
+                    <p style={{ ...FONT, fontSize: 11, color: G.textMuted }}>{order.service?.name ?? 'Service Request'}</p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <StatusPill status={order.status} />
-                    <button onClick={() => navigate('/admin/orders')}
-                      style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: '#38bdf8', background: 'none', border: 'none', cursor: 'pointer' }}>
-                      View
-                    </button>
+                    <button onClick={() => navigate('/admin/orders')} style={{ ...FONT, fontSize: 12, color: G.gold, background: 'none', border: 'none', cursor: 'pointer' }}>View</button>
                   </div>
                 </div>
               ))}
@@ -191,134 +172,112 @@ export default function DashboardContent() {
     );
   }
 
-  // ── CLIENT ───────────────────────────────────────────────────────────────
-
+  // CLIENT
   const pendingAction = orders.filter(o => o.status === ORDER_STATUS.APPROVED);
-
-  // First-time user has no orders yet
   const isFirstTimeUser = !loading && orders.length === 0;
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <style>{`@keyframes jk-spin { to { transform: rotate(360deg); } }`}</style>
+
       <div>
-        <h1 style={{ ...headingStyle, fontSize: 22, fontWeight: 900, marginBottom: 4 }}>
+        <h1 style={{ ...SERIF, fontSize: 24, fontWeight: 700, color: G.textPrimary, marginBottom: 4 }}>
           {getGreeting()}, {displayName} 👋
         </h1>
-        <p style={subStyle}>Welcome to your JK Motors dashboard.</p>
+        <p style={{ ...FONT, fontSize: 13, color: G.textMuted }}>Welcome to your JK Motors dashboard.</p>
       </div>
 
       {pendingAction.length > 0 && (
-        <div className="flex items-center justify-between p-4 rounded-xl"
-          style={{ background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)' }}>
-          <div className="flex items-center gap-3">
-            <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: '#818cf8' }} />
-            <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: '#c7d2fe' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 20px', borderRadius: 12, background: 'rgba(201,168,76,0.08)', border: `1px solid rgba(201,168,76,0.3)` }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <AlertCircle className="w-5 h-5 flex-shrink-0" style={{ color: G.gold }} />
+            <p style={{ ...FONT, fontSize: 13, fontWeight: 500, color: G.textPrimary }}>
               You have {pendingAction.length} order{pendingAction.length > 1 ? 's' : ''} waiting for your response!
             </p>
           </div>
           <button onClick={() => navigate('/my-orders')}
-            className="px-4 py-1.5 rounded-lg text-xs font-semibold text-white"
-            style={{ background: 'linear-gradient(135deg,#0EA5E9,#6366F1)', border: 'none', cursor: 'pointer' }}>
+            style={{ padding: '6px 16px', borderRadius: 8, background: 'linear-gradient(135deg,#8B6914,#C9A84C)', border: 'none', color: '#1C1609', ...FONT, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
             Review Now
           </button>
         </div>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(130px,1fr))', gap: 14 }}>
         {[
-          { label: 'Total Orders', value: orders.length,                          color: '#0EA5E9', icon: <ShoppingCart className="w-5 h-5" /> },
-          { label: 'Pending',      value: countByStatus(ORDER_STATUS.PENDING),    color: '#f59e0b', icon: <Clock className="w-5 h-5" /> },
-          { label: 'Confirmed',    value: countByStatus(ORDER_STATUS.CONFIRMED),  color: '#10b981', icon: <CheckCircle className="w-5 h-5" /> },
-          { label: 'Completed',    value: countByStatus(ORDER_STATUS.COMPLETED),  color: '#6366F1', icon: <CheckCircle className="w-5 h-5" /> },
+          { label: 'Total Orders', value: orders.length,                          color: G.gold,      icon: <ShoppingCart className="w-5 h-5" /> },
+          { label: 'Pending',      value: countByStatus(ORDER_STATUS.PENDING),    color: '#E8C96A',   icon: <Clock className="w-5 h-5" /> },
+          { label: 'Confirmed',    value: countByStatus(ORDER_STATUS.CONFIRMED),  color: '#6ee7b7',   icon: <CheckCircle className="w-5 h-5" /> },
+          { label: 'Completed',    value: countByStatus(ORDER_STATUS.COMPLETED),  color: '#A07830',   icon: <CheckCircle className="w-5 h-5" /> },
         ].map((s, i) => (
-          <JKCard key={i} style={{ padding: 20 }}>
-            <div className="w-9 h-9 rounded-lg flex items-center justify-center mb-3"
-              style={{ background: `${s.color}18`, color: s.color, border: `1px solid ${s.color}30` }}>
+          <JKCard key={i}>
+            <div style={{ width: 38, height: 38, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `${s.color}18`, color: s.color, border: `1px solid ${s.color}30`, marginBottom: 12 }}>
               {s.icon}
             </div>
-            <div style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 26, fontWeight: 900, color: '#e2e8f0' }}>
-              {loading ? '—' : s.value}
-            </div>
-            <div style={labelStyle}>{s.label}</div>
+            <div style={{ ...SERIF, fontSize: 26, fontWeight: 700, color: G.textPrimary }}>{loading ? '—' : s.value}</div>
+            <div style={LABEL}>{s.label}</div>
           </JKCard>
         ))}
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Book a Service — goes to /services for first-timers, /order/new for returning users */}
-        <button
-          onClick={handleNewOrder}
-          className="rounded-xl p-5 text-left text-white transition-transform hover:-translate-y-0.5"
-          style={{
-            background: 'linear-gradient(135deg,#0F3460,#0EA5E9,#6366F1)',
-            border: '1px solid rgba(14,165,233,0.3)',
-            boxShadow: '0 8px 32px rgba(14,165,233,0.2)',
-            cursor: 'pointer',
-          }}
-        >
-          <ShoppingCart className="w-7 h-7 mb-3 opacity-90" style={{ color: '#bae6fd' }} />
-          <p style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 14, fontWeight: 700, marginBottom: 4 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+        <button onClick={handleNewOrder} style={{
+          borderRadius: 16, padding: 20, textAlign: 'left', color: '#1C1609',
+          background: 'linear-gradient(135deg,#6B5010,#C9A84C,#8B6914)',
+          border: `1px solid rgba(201,168,76,0.4)`,
+          boxShadow: '0 8px 32px rgba(201,168,76,0.15)', cursor: 'pointer',
+          transition: 'transform 0.2s',
+        }}
+          onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
+          <ShoppingCart className="w-7 h-7 mb-3" style={{ color: '#1C1609', opacity: 0.85 }} />
+          <p style={{ ...SERIF, fontSize: 15, fontWeight: 700, marginBottom: 4, color: '#1C1609' }}>
             {isFirstTimeUser ? 'Browse Services' : 'Book a Service'}
           </p>
-          <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: '#bae6fd' }}>
-            {isFirstTimeUser
-              ? 'Explore our services and place your first order.'
-              : 'We\'ll come to you — browse and order now.'}
+          <p style={{ ...FONT, fontSize: 12, color: 'rgba(28,22,9,0.75)' }}>
+            {isFirstTimeUser ? 'Explore our services and place your first order.' : "We'll come to you — browse and order now."}
           </p>
         </button>
 
-        <JKCard onClick={() => navigate('/my-orders')}
-          style={{ padding: 20, cursor: 'pointer', transition: 'all 0.2s' }}>
-          <Package className="w-7 h-7 mb-3" style={{ color: '#0EA5E9' }} />
-          <p style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 14, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>My Orders</p>
-          <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: '#64748b' }}>Track the status of your service requests.</p>
+        <JKCard onClick={() => navigate('/my-orders')} style={{ transition: 'border-color 0.2s' }}
+          onMouseEnter={e => e.currentTarget.style.borderColor = G.goldDim}
+          onMouseLeave={e => e.currentTarget.style.borderColor = G.border}>
+          <Package className="w-7 h-7 mb-3" style={{ color: G.gold }} />
+          <p style={{ ...SERIF, fontSize: 15, fontWeight: 700, color: G.textPrimary, marginBottom: 4 }}>My Orders</p>
+          <p style={{ ...FONT, fontSize: 12, color: G.textMuted }}>Track the status of your service requests.</p>
         </JKCard>
       </div>
 
-      <JKCard>
-        <div className="flex items-center justify-between px-5 py-4" style={{ borderBottom: '1px solid rgba(14,165,233,0.1)' }}>
-          <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 600, color: '#e2e8f0' }}>Recent Orders</h3>
-          <button onClick={() => navigate('/my-orders')}
-            style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 12, color: '#38bdf8', background: 'none', border: 'none', cursor: 'pointer' }}>
-            View all →
-          </button>
+      <JKCard style={{ padding: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: `1px solid ${G.border}` }}>
+          <h3 style={{ ...FONT, fontSize: 14, fontWeight: 600, color: G.textPrimary }}>Recent Orders</h3>
+          <button onClick={() => navigate('/my-orders')} style={{ ...FONT, fontSize: 12, color: G.gold, background: 'none', border: 'none', cursor: 'pointer' }}>View all →</button>
         </div>
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="w-6 h-6 rounded-full border-2 animate-spin" style={{ borderColor: 'rgba(14,165,233,0.2)', borderTopColor: '#0EA5E9' }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 48 }}>
+            <div style={{ width: 24, height: 24, borderRadius: '50%', border: `2px solid ${G.goldDim}`, borderTopColor: G.gold, animation: 'jk-spin 0.8s linear infinite' }} />
           </div>
         ) : orders.length === 0 ? (
-          <div className="text-center py-12">
-            <ShoppingCart className="w-10 h-10 mx-auto mb-3" style={{ color: '#1e3d6e' }} />
-            <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, color: '#475569', marginBottom: 12 }}>No orders yet</p>
-            {/* First-time user: Browse Services instead of direct order form */}
-            <button
-              onClick={() => navigate('/services')}
-              className="px-4 py-2 rounded-lg text-xs font-semibold text-white"
-              style={{ background: 'linear-gradient(135deg,#0EA5E9,#6366F1)', border: 'none', cursor: 'pointer' }}>
+          <div style={{ textAlign: 'center', padding: 48 }}>
+            <ShoppingCart className="w-10 h-10 mx-auto mb-3" style={{ color: G.goldDim }} />
+            <p style={{ ...FONT, fontSize: 13, color: G.textMuted, marginBottom: 12 }}>No orders yet</p>
+            <button onClick={() => navigate('/services')}
+              style={{ padding: '8px 20px', borderRadius: 8, background: 'linear-gradient(135deg,#8B6914,#C9A84C)', border: 'none', color: '#1C1609', ...FONT, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
               Browse Services
             </button>
           </div>
         ) : (
           <div>
             {orders.slice(0, 4).map(order => (
-              <div key={order.id} className="flex items-center justify-between px-5 py-3"
-                style={{ borderBottom: '1px solid rgba(14,165,233,0.06)' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(14,165,233,0.04)'}
+              <div key={order.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px', borderBottom: `1px solid rgba(201,168,76,0.07)`, transition: 'background 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.background = G.goldDimmer}
                 onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
                 <div>
-                  <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
-                    {order.service?.name ?? 'Service Request'}
-                  </p>
-                  <p style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 11, color: '#64748b' }}>
-                    {order.carMake} {order.carModel} · {new Date(order.createdAt).toLocaleDateString()}
-                  </p>
+                  <p style={{ ...FONT, fontSize: 13, fontWeight: 500, color: G.textPrimary }}>{order.service?.name ?? 'Service Request'}</p>
+                  <p style={{ ...FONT, fontSize: 11, color: G.textMuted }}>{order.carMake} {order.carModel} · {new Date(order.createdAt).toLocaleDateString()}</p>
                 </div>
-                <div className="flex items-center gap-3">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   {order.quotedPrice && (
-                    <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700, color: '#38bdf8' }}>
-                      RWF {Number(order.quotedPrice).toLocaleString()}
-                    </span>
+                    <span style={{ ...SERIF, fontSize: 14, fontWeight: 700, color: G.gold }}>RWF {Number(order.quotedPrice).toLocaleString()}</span>
                   )}
                   <StatusPill status={order.status} />
                 </div>

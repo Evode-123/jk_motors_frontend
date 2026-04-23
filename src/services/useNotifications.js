@@ -1,16 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import apiService from '../services/apiService';
 
-/**
- * useNotifications — manages real-time SSE connection + notification state.
- *
- * Uses native EventSource with token passed as query param since standard
- * EventSource doesn't support custom headers.
- * Backend must accept: GET /api/notifications/stream?token=...
- *
- * If your backend doesn't support token as query param, use
- * @microsoft/fetch-event-source instead (install separately).
- */
 export function useNotifications(userId) {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount,   setUnreadCount]   = useState(0);

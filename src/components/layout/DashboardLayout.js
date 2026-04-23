@@ -9,11 +9,23 @@ import { USER_ROLES }       from '../../utils/constants';
 import { useNotifications } from '../../services/useNotifications';
 import apiService           from '../../services/apiService';
 
-const PATH_PARENT_MAP = {
-  '/order/new': '/services',
+const G = {
+  gold:       '#C9A84C',
+  goldLight:  '#E8C96A',
+  goldDim:    'rgba(201,168,76,0.18)',
+  goldDimmer: 'rgba(201,168,76,0.10)',
+  goldText:   '#C9A84C',
+  bg:         '#0A0804',
+  surface:    '#100D05',
+  surface2:   '#181308',
+  surface3:   '#201A0A',
+  textPrimary:'#F5E4B8',
+  textMuted:  'rgba(168,136,72,0.75)',
+  border:     'rgba(201,168,76,0.16)',
 };
 
-/* ── UserAvatar ─────────────────────────────────────────────────────────────── */
+const PATH_PARENT_MAP = { '/order/new': '/services' };
+
 function UserAvatar({ user, size = 32, fontSize = 12 }) {
   const [imgError, setImgError] = useState(false);
 
@@ -31,19 +43,21 @@ function UserAvatar({ user, size = 32, fontSize = 12 }) {
   if (user?.avatarUrl && !imgError) {
     return (
       <img src={user.avatarUrl} alt={getInitials()} onError={() => setImgError(true)}
-        style={{ ...commonStyle, objectFit: 'cover', border: '1.5px solid rgba(14,165,233,0.35)' }}
+        style={{ ...commonStyle, objectFit: 'cover', border: `1.5px solid ${G.goldDim}` }}
       />
     );
   }
   return (
-    <div style={{ ...commonStyle, background: 'linear-gradient(135deg,#0EA5E9,#6366F1)',
-      fontFamily: "'Space Grotesk', sans-serif", fontSize, fontWeight: 700, color: '#fff' }}>
+    <div style={{
+      ...commonStyle,
+      background: 'linear-gradient(135deg,#8B6914,#C9A84C)',
+      fontFamily: "'DM Sans', sans-serif", fontSize, fontWeight: 700, color: '#1C1609',
+    }}>
       {getInitials()}
     </div>
   );
 }
 
-/* ── SidebarAvatar ─────────────────────────────────────────────────────────── */
 function SidebarAvatar({ user }) {
   const [imgError, setImgError] = useState(false);
   const getInitials = () => {
@@ -54,22 +68,21 @@ function SidebarAvatar({ user }) {
   if (user?.avatarUrl && !imgError) {
     return (
       <img src={user.avatarUrl} alt={getInitials()} onError={() => setImgError(true)}
-        style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0,
-          border: '1.5px solid rgba(14,165,233,0.35)' }}
-      />
+        style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `1.5px solid ${G.goldDim}` }} />
     );
   }
   return (
-    <div style={{ width: 36, height: 36, borderRadius: '50%',
-      background: 'linear-gradient(135deg,#0EA5E9,#6366F1)',
+    <div style={{
+      width: 36, height: 36, borderRadius: '50%',
+      background: 'linear-gradient(135deg,#8B6914,#C9A84C)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: "'Space Grotesk', sans-serif", fontSize: 13, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+      fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#1C1609', flexShrink: 0,
+    }}>
       {getInitials()}
     </div>
   );
 }
 
-/* ── DashboardLayout ────────────────────────────────────────────────────────── */
 const DashboardLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate         = useNavigate();
@@ -78,8 +91,6 @@ const DashboardLayout = ({ children }) => {
   const [mobileOpen,  setMobileOpen]  = useState(false);
 
   const { unreadCount } = useNotifications(user?.id);
-
-  // ── FIX: declare BEFORE adminMenu so it's available when the array is built ──
   const [adminFeedbackUnread, setAdminFeedbackUnread] = useState(0);
 
   useEffect(() => {
@@ -89,7 +100,6 @@ const DashboardLayout = ({ children }) => {
         .catch(() => {});
     }
   }, [user]);
-  // ────────────────────────────────────────────────────────────────────────────
 
   const adminMenu = [
     { icon: <LayoutDashboard className="w-5 h-5" />, label: 'Dashboard',       path: '/dashboard' },
@@ -143,31 +153,33 @@ const DashboardLayout = ({ children }) => {
     return (
       <>
         {/* Logo */}
-        <div className="flex items-center justify-between px-4 py-4 flex-shrink-0"
-          style={{ borderBottom: '1px solid rgba(14,165,233,0.15)', minHeight: 65 }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '16px', borderBottom: `1px solid ${G.border}`, minHeight: 65,
+        }}>
           {showLabels && (
-            <button onClick={() => navigate('/')} className="flex items-center gap-2.5 text-left">
-              <img src="/jk_logo.jpeg" alt="JK" className="w-8 h-8 rounded-lg object-cover"
-                style={{ border: '1px solid rgba(14,165,233,0.3)', boxShadow: '0 0 12px rgba(14,165,233,0.2)' }} />
+            <button onClick={() => navigate('/')} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'none', border: 'none', cursor: 'pointer' }}>
+              <img src="/jk_logo.jpeg" alt="JK"
+                style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'cover', border: `1px solid ${G.goldDim}` }} />
               <div>
-                <div style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 13, fontWeight: 900,
-                  color: '#f97316', letterSpacing: '0.15em', lineHeight: 1 }}>JK MOTORS</div>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 9, color: '#38bdf8',
-                  letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: 2 }}>
+                <div style={{ fontFamily: "'Playfair Display', serif", fontSize: 14, fontWeight: 700, color: G.gold, letterSpacing: '0.12em', lineHeight: 1 }}>
+                  JK MOTORS
+                </div>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, color: G.textMuted, letterSpacing: '0.2em', textTransform: 'uppercase', marginTop: 2 }}>
                   {user?.role?.toLowerCase()}
                 </div>
               </div>
             </button>
           )}
           {mobile ? (
-            <button onClick={() => setMobileOpen(false)} className="p-2 rounded-lg"
-              style={{ background: 'rgba(14,165,233,0.08)', color: '#94a3b8' }}>
+            <button onClick={() => setMobileOpen(false)}
+              style={{ padding: 8, borderRadius: 8, background: G.goldDimmer, border: `1px solid ${G.border}`, color: G.textMuted, cursor: 'pointer' }}>
               <X className="w-5 h-5" />
             </button>
           ) : (
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-2 rounded-lg transition-colors"
-              style={{ color: '#94a3b8' }}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(14,165,233,0.08)'}
+            <button onClick={() => setSidebarOpen(!sidebarOpen)}
+              style={{ padding: 8, borderRadius: 8, background: 'transparent', border: 'none', color: G.textMuted, cursor: 'pointer' }}
+              onMouseEnter={e => e.currentTarget.style.background = G.goldDimmer}
               onMouseLeave={e => e.currentTarget.style.background = 'transparent'}>
               <Menu className="w-5 h-5" />
             </button>
@@ -175,7 +187,7 @@ const DashboardLayout = ({ children }) => {
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav style={{ flex: 1, padding: '12px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 2 }}>
           {currentMenuItems.map((item) => {
             const active   = isActive(item.path);
             const hasBadge = item.badge > 0;
@@ -184,31 +196,33 @@ const DashboardLayout = ({ children }) => {
               <button key={item.path}
                 onClick={() => { navigate(item.path); if (mobile) setMobileOpen(false); }}
                 title={!showLabels ? item.label : undefined}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left relative"
                 style={{
-                  background: active ? 'linear-gradient(135deg, rgba(14,165,233,0.2), rgba(99,102,241,0.15))' : 'transparent',
-                  border: active ? '1px solid rgba(14,165,233,0.3)' : '1px solid transparent',
-                  color: active ? '#38bdf8' : '#94a3b8',
-                  fontFamily: "'Space Grotesk', sans-serif",
+                  width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+                  padding: '9px 12px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                  background: active ? G.goldDimmer : 'transparent',
+                  borderLeft: active ? `2px solid ${G.gold}` : '2px solid transparent',
+                  color: active ? G.gold : G.textMuted,
+                  fontFamily: "'DM Sans', sans-serif",
+                  transition: 'all 0.15s',
+                  position: 'relative',
+                  textAlign: 'left',
                 }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(14,165,233,0.06)'; }}
-                onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent'; }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'rgba(201,168,76,0.05)'; e.currentTarget.style.color = G.textPrimary; }}}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = G.textMuted; }}}
               >
-                <span className="flex-shrink-0 relative">
+                <span style={{ flexShrink: 0, position: 'relative' }}>
                   {item.icon}
                   {hasBadge && !showLabels && (
-                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-white"
-                      style={{ background: '#ef4444', fontSize: 9, fontWeight: 700 }}>
+                    <span style={{ position: 'absolute', top: -4, right: -4, width: 14, height: 14, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: G.gold, color: '#1C1609', fontSize: 8, fontWeight: 700 }}>
                       {item.badge > 9 ? '9+' : item.badge}
                     </span>
                   )}
                 </span>
                 {showLabels && (
                   <>
-                    <span style={{ fontSize: 14, fontWeight: active ? 600 : 400 }}>{item.label}</span>
+                    <span style={{ fontSize: 14, fontWeight: active ? 500 : 400 }}>{item.label}</span>
                     {hasBadge && (
-                      <span className="ml-auto text-white rounded-full px-1.5 py-0.5"
-                        style={{ background: '#ef4444', fontSize: 10, fontWeight: 700 }}>
+                      <span style={{ marginLeft: 'auto', background: G.gold, color: '#1C1609', borderRadius: 20, padding: '2px 7px', fontSize: 10, fontWeight: 700 }}>
                         {item.badge > 9 ? '9+' : item.badge}
                       </span>
                     )}
@@ -220,14 +234,17 @@ const DashboardLayout = ({ children }) => {
         </nav>
 
         {/* Logout */}
-        <div className="px-3 pb-4 pt-3 space-y-1 flex-shrink-0"
-          style={{ borderTop: '1px solid rgba(14,165,233,0.15)' }}>
+        <div style={{ padding: '12px', borderTop: `1px solid ${G.border}` }}>
           <button onClick={handleLogout}
             title={!showLabels ? 'Logout' : undefined}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all"
-            style={{ color: '#94a3b8', fontFamily: "'Space Grotesk', sans-serif" }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(239,68,68,0.1)'; e.currentTarget.style.color = '#f87171'; }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#94a3b8'; }}>
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', gap: 10,
+              padding: '9px 12px', borderRadius: 10, border: 'none', cursor: 'pointer',
+              background: 'transparent', color: G.textMuted,
+              fontFamily: "'DM Sans', sans-serif", transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(180,60,40,0.1)'; e.currentTarget.style.color = '#f87171'; }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = G.textMuted; }}>
             <LogOut className="w-5 h-5 flex-shrink-0" />
             {showLabels && <span style={{ fontSize: 14 }}>Logout</span>}
           </button>
@@ -236,43 +253,47 @@ const DashboardLayout = ({ children }) => {
     );
   };
 
+  const sidebarBg = `linear-gradient(180deg, ${G.surface} 0%, ${G.surface2} 100%)`;
+  const sidebarBorder = `1px solid ${G.border}`;
+
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Orbitron:wght@700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Orbitron:wght@700;900&family=Space+Grotesk:wght@400;500;600;700&display=swap');
         .jk-scrollbar::-webkit-scrollbar { width: 4px; }
         .jk-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .jk-scrollbar::-webkit-scrollbar-thumb { background: rgba(14,165,233,0.3); border-radius: 2px; }
-        .jk-input { background: rgba(14,165,233,0.04) !important; border: 1px solid rgba(14,165,233,0.2) !important; color: #e2e8f0 !important; border-radius: 12px !important; }
-        .jk-input:focus { border-color: rgba(14,165,233,0.5) !important; outline: none !important; box-shadow: 0 0 0 3px rgba(14,165,233,0.08) !important; }
-        .jk-input::placeholder { color: rgba(148,163,184,0.5) !important; }
-        .jk-select { background: rgba(14,165,233,0.04) !important; border: 1px solid rgba(14,165,233,0.2) !important; color: #e2e8f0 !important; border-radius: 12px !important; appearance: none; }
-        .jk-select option { background: #1E3A58 !important; color: #e2e8f0 !important; }
-        .jk-table-row:hover { background: rgba(14,165,233,0.04) !important; }
-        .jk-btn-primary { background: linear-gradient(135deg,#0EA5E9,#6366F1) !important; color: #fff !important; border: none !important; }
+        .jk-scrollbar::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.25); border-radius: 2px; }
+        .jk-input { background: rgba(20,16,8,0.8) !important; border: 1px solid rgba(201,168,76,0.22) !important; color: #E8D5A0 !important; border-radius: 12px !important; }
+        .jk-input:focus { border-color: rgba(201,168,76,0.5) !important; outline: none !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.08) !important; }
+        .jk-input::placeholder { color: rgba(168,136,72,0.45) !important; }
+        .jk-select { background: rgba(20,16,8,0.8) !important; border: 1px solid rgba(201,168,76,0.22) !important; color: #E8D5A0 !important; border-radius: 12px !important; appearance: none; }
+        .jk-select option { background: #1C1609 !important; color: #E8D5A0 !important; }
+        .jk-table-row:hover { background: rgba(201,168,76,0.04) !important; }
+        .jk-btn-primary { background: linear-gradient(135deg,#8B6914,#C9A84C) !important; color: #1C1609 !important; border: none !important; }
         .jk-btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-        .jk-btn-danger { background: rgba(239,68,68,0.1) !important; color: #f87171 !important; border: 1px solid rgba(239,68,68,0.2) !important; }
-        .jk-btn-danger:hover { background: rgba(239,68,68,0.2) !important; }
-        .jk-card { background: rgba(30,61,110,0.5) !important; border: 1px solid rgba(14,165,233,0.15) !important; border-radius: 16px !important; }
-        .jk-modal { background: linear-gradient(160deg,#0F2644,#1E3D6E) !important; border: 1px solid rgba(14,165,233,0.2) !important; border-radius: 20px !important; }
+        .jk-btn-danger { background: rgba(180,60,40,0.1) !important; color: #f87171 !important; border: 1px solid rgba(180,60,40,0.25) !important; }
+        .jk-btn-danger:hover { background: rgba(180,60,40,0.2) !important; }
+        .jk-card { background: rgba(28,22,9,0.6) !important; border: 1px solid rgba(201,168,76,0.16) !important; border-radius: 16px !important; }
+        .jk-modal { background: linear-gradient(160deg,#100D05,#1C1609) !important; border: 1px solid rgba(201,168,76,0.22) !important; border-radius: 20px !important; }
+        @keyframes jk-spin { to { transform: rotate(360deg); } }
       `}</style>
 
-      <div className="flex h-screen" style={{ background: '#0F2644', fontFamily: "'Space Grotesk', sans-serif" }}>
+      <div className="flex h-screen" style={{ background: G.bg, fontFamily: "'DM Sans', sans-serif" }}>
 
         {mobileOpen && (
-          <div className="fixed inset-0 z-40 md:hidden" style={{ background: 'rgba(0,0,0,0.7)' }}
+          <div className="fixed inset-0 z-40 md:hidden" style={{ background: 'rgba(0,0,0,0.75)' }}
             onClick={() => setMobileOpen(false)} />
         )}
 
         {/* Mobile sidebar */}
         <div className={`fixed inset-y-0 left-0 z-50 w-72 flex flex-col md:hidden transition-transform duration-300 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}
-          style={{ background: 'linear-gradient(180deg,#0B1E33,#0F2644)', borderRight: '1px solid rgba(14,165,233,0.15)' }}>
+          style={{ background: sidebarBg, borderRight: sidebarBorder }}>
           <SidebarContent mobile />
         </div>
 
         {/* Desktop sidebar */}
         <div className={`${sidebarOpen ? 'w-64' : 'w-[68px]'} hidden md:flex flex-col flex-shrink-0 transition-all duration-300`}
-          style={{ background: 'linear-gradient(180deg,#0B1E33,#0F2644)', borderRight: '1px solid rgba(14,165,233,0.15)' }}>
+          style={{ background: sidebarBg, borderRight: sidebarBorder }}>
           <SidebarContent />
         </div>
 
@@ -281,62 +302,77 @@ const DashboardLayout = ({ children }) => {
 
           {/* Top bar */}
           <header style={{
-            background: 'rgba(11,30,51,0.8)', backdropFilter: 'blur(12px)',
-            borderBottom: '1px solid rgba(14,165,233,0.12)',
+            background: `rgba(10,8,4,0.85)`,
+            backdropFilter: 'blur(12px)',
+            borderBottom: `1px solid ${G.border}`,
             padding: '0 24px', height: 65,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0,
           }}>
-            <div className="flex items-center gap-3">
-              <button className="md:hidden p-2 rounded-lg" style={{ color: '#94a3b8' }}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <button className="md:hidden" style={{ padding: 8, borderRadius: 8, background: 'none', border: 'none', color: G.textMuted, cursor: 'pointer' }}
                 onClick={() => setMobileOpen(true)}>
                 <Menu className="w-5 h-5" />
               </button>
               <div>
-                <div style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: 14, fontWeight: 600, color: '#e2e8f0' }}>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, fontWeight: 500, color: G.textPrimary }}>
                   {activeLabel}
                 </div>
-                <div style={{ fontSize: 11, color: '#38bdf8', letterSpacing: '0.05em' }}>JK Motors</div>
+                <div style={{ fontSize: 11, color: G.gold, letterSpacing: '0.05em' }}>JK Motors</div>
               </div>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               {user?.role === USER_ROLES.CLIENT && (
                 <button onClick={() => navigate('/order/new')}
-                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-white"
-                  style={{ background: 'linear-gradient(135deg,#0EA5E9,#6366F1)', boxShadow: '0 2px 10px rgba(14,165,233,0.25)' }}>
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold"
+                  style={{
+                    background: 'linear-gradient(135deg,#8B6914,#C9A84C)',
+                    border: 'none', color: '#1C1609',
+                    fontFamily: "'DM Sans', sans-serif", cursor: 'pointer',
+                    boxShadow: '0 2px 10px rgba(201,168,76,0.2)',
+                  }}>
                   <ShoppingCart className="w-3.5 h-3.5" /> New Order
                 </button>
               )}
 
               <button onClick={() => navigate('/notifications')}
-                className="relative p-2 rounded-lg transition-colors"
-                style={{ color: '#94a3b8', background: 'rgba(14,165,233,0.06)', border: '1px solid rgba(14,165,233,0.1)' }}>
+                style={{
+                  position: 'relative', padding: 8, borderRadius: 8, cursor: 'pointer',
+                  background: G.goldDimmer, border: `1px solid ${G.border}`, color: G.textMuted,
+                }}>
                 <Bell className="w-5 h-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full flex items-center justify-center text-white"
-                    style={{ background: '#ef4444', fontSize: 9, fontWeight: 700 }}>
+                  <span style={{
+                    position: 'absolute', top: 2, right: 2, width: 14, height: 14,
+                    borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: G.gold, color: '#1C1609', fontSize: 8, fontWeight: 700,
+                  }}>
                     {unreadCount > 9 ? '9+' : unreadCount}
                   </span>
                 )}
               </button>
 
-              <div className="flex items-center gap-2 pl-3 cursor-pointer"
-                style={{ borderLeft: '1px solid rgba(14,165,233,0.15)' }}
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 8, paddingLeft: 12, cursor: 'pointer',
+                borderLeft: `1px solid ${G.border}`,
+              }}
                 onClick={() => navigate('/profile')} title="Go to Profile">
                 <UserAvatar user={user} size={32} fontSize={12} />
                 <div className="text-right hidden sm:block">
-                  <p style={{ fontSize: 12, fontWeight: 600, color: '#e2e8f0' }}>{getDisplayName()}</p>
-                  <p style={{ fontSize: 10, color: '#38bdf8', textTransform: 'capitalize' }}>{user?.role?.toLowerCase()}</p>
+                  <p style={{ fontSize: 12, fontWeight: 500, color: G.textPrimary }}>{getDisplayName()}</p>
+                  <p style={{ fontSize: 10, color: G.gold, textTransform: 'capitalize' }}>{user?.role?.toLowerCase()}</p>
                 </div>
               </div>
             </div>
           </header>
 
           {/* Page content */}
-          <main className="flex-1 overflow-auto jk-scrollbar" style={{ background: '#0F2644' }}>
-            <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
-              backgroundImage: 'linear-gradient(rgba(14,165,233,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,0.025) 1px,transparent 1px)',
-              backgroundSize: '50px 50px' }} />
+          <main className="flex-1 overflow-auto jk-scrollbar" style={{ background: G.bg }}>
+            <div style={{
+              position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+              backgroundImage: 'linear-gradient(rgba(201,168,76,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.02) 1px,transparent 1px)',
+              backgroundSize: '50px 50px',
+            }} />
             <div style={{ position: 'relative', zIndex: 1, padding: 24, minHeight: '100%' }}>
               {children}
             </div>

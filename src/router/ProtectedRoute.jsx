@@ -3,20 +3,6 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { USER_ROLES } from '../utils/constants';
 
-/**
- * ProtectedRoute — wraps any route that requires authentication.
- *
- * Props:
- *   allowedRoles  — array of USER_ROLES allowed (omit to allow any authenticated user)
- *   adminOnly     — shorthand for allowedRoles={[USER_ROLES.ADMIN]}
- *
- * Gates (checked in order):
- *   1. Not logged in            → /login  (saves current URL as ?redirect=)
- *   2. mustChangePassword       → /change-password
- *   3. !profileCompleted        → /complete-profile
- *   4. Wrong role               → /unauthorized
- *   5. All good                 → render children
- */
 const ProtectedRoute = ({ children, allowedRoles, adminOnly = false }) => {
   const { user, loading } = useAuth();
   const location = useLocation();
