@@ -4,7 +4,7 @@ import { AuthProvider, useAuth }  from './context/AuthContext';
 import ProtectedRoute             from './router/ProtectedRoute';
 import GuestRoute                 from './router/GuestRoute';
 import { USER_ROLES }             from './utils/constants';
-import { usePageTracker }         from './hooks/usePageTracker';  // ← NEW
+import { usePageTracker }         from './hooks/usePageTracker';
 
 // ── Public pages ──────────────────────────────────────────────────────────────
 import LandingPage        from './pages/LandingPage';
@@ -38,15 +38,14 @@ import MyOrders  from './components/orders/MyOrders';
 import AdminUserManagement    from './components/admin/AdminUserManagement';
 import AdminCatalogManagement from './components/admin/AdminCatalogManagement';
 import AdminOrderManagement   from './components/admin/AdminOrderManagement';
-import AdminAnalytics         from './components/admin/AdminAnalytics';  // ← NEW
+import AdminAnalytics         from './components/admin/AdminAnalytics';
+import AdminContactMessages   from './components/admin/AdminContactMessages';
 
 import FeedbackPage       from './components/feedback/FeedbackPage';
 import AdminFeedbackPage  from './components/admin/AdminFeedbackPage';
 
 // ── PageTracker — fires analytics event on every route change ─────────────────
-// Must live INSIDE <BrowserRouter> and <AuthProvider> so it can access both
-// the router context (useLocation) and the auth context (useAuth).
-function PageTracker() {     // ← NEW
+function PageTracker() {
   usePageTracker();
   return null;
 }
@@ -73,7 +72,7 @@ const SmartServicesRoute = () => {
 const App = () => (
   <BrowserRouter>
     <AuthProvider>
-      <PageTracker />   {/* ← NEW — must be inside BrowserRouter + AuthProvider */}
+      <PageTracker />
 
       <Routes>
 
@@ -132,23 +131,23 @@ const App = () => (
           </ProtectedRoute>
         } />
 
-        {/* ── Client: Feedback ───────────────────────────────────────── */}
+        {/* ── Client: Feedback ──────────────────────────────────────────── */}
         <Route path="/feedback" element={
-         <ProtectedRoute allowedRoles={[USER_ROLES.CLIENT]}>
-           <DashboardLayout>
-             <FeedbackPage />
-           </DashboardLayout>
-         </ProtectedRoute>
-       } />
-    
-       {/* ── Admin: Feedback management ──────────────────────────────── */}
-      <Route path="/admin/feedback" element={
-         <ProtectedRoute adminOnly>
-           <DashboardLayout>
-             <AdminFeedbackPage />
-           </DashboardLayout>
-         </ProtectedRoute>
-       } />
+          <ProtectedRoute allowedRoles={[USER_ROLES.CLIENT]}>
+            <DashboardLayout>
+              <FeedbackPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* ── Admin: Feedback management ────────────────────────────────── */}
+        <Route path="/admin/feedback" element={
+          <ProtectedRoute adminOnly>
+            <DashboardLayout>
+              <AdminFeedbackPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        } />
 
         {/* ── Admin routes ──────────────────────────────────────────────── */}
         <Route path="/admin/orders" element={
@@ -169,10 +168,17 @@ const App = () => (
           </ProtectedRoute>
         } />
 
-        {/* ── Analytics — NEW ───────────────────────────────────────────── */}
+        {/* ── Analytics ─────────────────────────────────────────────────── */}
         <Route path="/admin/analytics" element={
           <ProtectedRoute adminOnly>
             <DashboardLayout><AdminAnalytics /></DashboardLayout>
+          </ProtectedRoute>
+        } />
+
+        {/* ── Contact Messages ──────────────────────────────────────────── */}
+        <Route path="/admin/contacts" element={
+          <ProtectedRoute adminOnly>
+            <DashboardLayout><AdminContactMessages /></DashboardLayout>
           </ProtectedRoute>
         } />
 

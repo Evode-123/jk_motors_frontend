@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LogOut, Bell, Menu, User,
-  ShoppingCart, Package, Users, LayoutDashboard, X, Wrench, BarChart2, MessageSquare
+  ShoppingCart, Package, Users, LayoutDashboard, X, Wrench, BarChart2, MessageSquare, Mail
 } from 'lucide-react';
 import { useAuth }          from '../../context/AuthContext';
 import { USER_ROLES }       from '../../utils/constants';
@@ -92,6 +92,7 @@ const DashboardLayout = ({ children }) => {
 
   const { unreadCount } = useNotifications(user?.id);
   const [adminFeedbackUnread, setAdminFeedbackUnread] = useState(0);
+  const [adminContactUnread, setAdminContactUnread]   = useState(0);
 
   useEffect(() => {
     if (user?.role === USER_ROLES.ADMIN) {
@@ -101,15 +102,24 @@ const DashboardLayout = ({ children }) => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (user?.role === USER_ROLES.ADMIN) {
+      apiService.adminGetContactUnreadCount()
+        .then(n => setAdminContactUnread(n))
+        .catch(() => {});
+    }
+  }, [user]);
+
   const adminMenu = [
-    { icon: <LayoutDashboard className="w-5 h-5" />, label: 'Dashboard',       path: '/dashboard' },
-    { icon: <ShoppingCart    className="w-5 h-5" />, label: 'Orders',          path: '/admin/orders' },
-    { icon: <Wrench          className="w-5 h-5" />, label: 'Services',        path: '/services' },
-    { icon: <Package         className="w-5 h-5" />, label: 'Service Catalog', path: '/admin/catalog' },
-    { icon: <MessageSquare   className="w-5 h-5" />, label: 'Feedback',        path: '/admin/feedback', badge: adminFeedbackUnread },
-    { icon: <Users           className="w-5 h-5" />, label: 'Users',           path: '/admin/users' },
-    { icon: <BarChart2       className="w-5 h-5" />, label: 'Analytics',       path: '/admin/analytics' },
-    { icon: <Bell            className="w-5 h-5" />, label: 'Notifications',   path: '/notifications', badge: unreadCount },
+    { icon: <LayoutDashboard className="w-5 h-5" />, label: 'Dashboard',        path: '/dashboard' },
+    { icon: <ShoppingCart    className="w-5 h-5" />, label: 'Orders',           path: '/admin/orders' },
+    { icon: <Wrench          className="w-5 h-5" />, label: 'Services',         path: '/services' },
+    { icon: <Package         className="w-5 h-5" />, label: 'Service Catalog',  path: '/admin/catalog' },
+    { icon: <MessageSquare   className="w-5 h-5" />, label: 'Feedback',         path: '/admin/feedback',  badge: adminFeedbackUnread },
+    { icon: <Mail            className="w-5 h-5" />, label: 'Contact Messages', path: '/admin/contacts',  badge: adminContactUnread },
+    { icon: <Users           className="w-5 h-5" />, label: 'Users',            path: '/admin/users' },
+    { icon: <BarChart2       className="w-5 h-5" />, label: 'Analytics',        path: '/admin/analytics' },
+    { icon: <Bell            className="w-5 h-5" />, label: 'Notifications',    path: '/notifications',   badge: unreadCount },
   ];
 
   const clientMenu = [
