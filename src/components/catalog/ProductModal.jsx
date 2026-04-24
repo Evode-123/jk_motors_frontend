@@ -2,16 +2,16 @@ import React, { useState } from 'react';
 import { X, ShoppingCart, Package, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { STATIC_BASE_URL } from '../../utils/constants';
- 
+import { getImageUrl } from '../../utils/imageUrl';   // ← UPDATED
+
 export function ProductModal({ service, onClose }) {
   const { user }   = useAuth();
   const navigate   = useNavigate();
   const [selected, setSelected] = useState(null);
- 
+
   if (!service) return null;
   const products = service.products ?? [];
- 
+
   const handlePlaceOrder = (product) => {
     if (!user) {
       navigate(`/login?redirect=/order/new?serviceId=${service.id}&productId=${product?.id ?? ''}`);
@@ -21,13 +21,12 @@ export function ProductModal({ service, onClose }) {
     if (product) params.set('productId', product.id);
     navigate(`/order/new?${params.toString()}`);
   };
- 
+
   return (
     <div
       style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: 0, background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(6px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
-      {/* On md+ screens center it */}
       <div style={{
         position: 'relative', width: '100%', maxWidth: 720,
         maxHeight: '90vh', overflow: 'hidden',
@@ -39,7 +38,7 @@ export function ProductModal({ service, onClose }) {
       }}>
         {/* Top gold accent */}
         <div style={{ position: 'absolute', top: 0, left: '10%', right: '10%', height: 2, background: 'linear-gradient(90deg,transparent,#C9A84C,transparent)', borderRadius: 2 }} />
- 
+
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid rgba(201,168,76,0.15)', flexShrink: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -57,7 +56,7 @@ export function ProductModal({ service, onClose }) {
             <X className="w-5 h-5" />
           </button>
         </div>
- 
+
         {/* Body */}
         <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
           {products.length === 0 ? (
@@ -77,7 +76,7 @@ export function ProductModal({ service, onClose }) {
             </div>
           )}
         </div>
- 
+
         {/* Footer */}
         {products.length > 0 && (
           <div style={{ borderTop: '1px solid rgba(201,168,76,0.15)', padding: '16px 24px', flexShrink: 0 }}>
@@ -91,9 +90,9 @@ export function ProductModal({ service, onClose }) {
     </div>
   );
 }
- 
+
 function ProductCard({ product, onOrder }) {
-  const imageUrl = product.imageUrl ? `${STATIC_BASE_URL}${product.imageUrl}` : null;
+  const imageUrl = getImageUrl(product.imageUrl);   // ← UPDATED
   return (
     <div style={{ borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(201,168,76,0.16)', background: 'rgba(20,16,8,0.7)', transition: 'border-color 0.2s' }}
       onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(201,168,76,0.35)'}
@@ -121,5 +120,5 @@ function ProductCard({ product, onOrder }) {
     </div>
   );
 }
- 
+
 export default ProductModal;
