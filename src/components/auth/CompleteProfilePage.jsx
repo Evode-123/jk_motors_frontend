@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User } from 'lucide-react';
+import { User, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import apiService from '../../services/apiService';
-
-const CompleteProfilePage = () => {
+ 
+export const CompleteProfilePage = () => {
   const { updateUserState } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', phone: '' });
-  const [error, setError]       = useState('');
-  const [loading, setLoading]   = useState(false);
-
+  const [formData, setFormData] = useState({ firstName:'', lastName:'', phone:'' });
+  const [error,    setError]    = useState('');
+  const [loading,  setLoading]  = useState(false);
+ 
+  const GC = {
+    gold:'#C9A84C', goldDim:'rgba(201,168,76,0.22)',
+    textPrimary:'#F5E4B8', textMuted:'rgba(168,136,72,0.75)', border:'rgba(201,168,76,0.2)',
+  };
+ 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    e.preventDefault(); setError(''); setLoading(true);
     try {
       const res = await apiService.completeProfile(formData);
       updateUserState({
@@ -23,139 +26,78 @@ const CompleteProfilePage = () => {
         lastName:  res.user?.lastName  || formData.lastName,
         phone:     res.user?.phone     || formData.phone,
       });
-      navigate('/dashboard', { replace: true });
-    } catch (err) {
-      setError(err.message || 'Failed to save profile.');
-    } finally {
-      setLoading(false);
-    }
+      navigate('/dashboard', { replace:true });
+    } catch (err) { setError(err.message || 'Failed to save profile.'); }
+    finally { setLoading(false); }
   };
-
+ 
+  const inputStyle = (iconPadding=false) => ({
+    width:'100%', paddingLeft:iconPadding?40:16, paddingRight:16, paddingTop:12, paddingBottom:12,
+    borderRadius:12, fontSize:14, background:'rgba(20,16,8,0.8)',
+    border:`1px solid ${GC.border}`, fontFamily:"'DM Sans',sans-serif", boxSizing:'border-box',
+    color:'#F5E4B8',
+  });
+ 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center relative overflow-hidden p-4"
-      style={{ background: 'linear-gradient(160deg,#1a2d4a 0%,#1e3557 35%,#1a3d66 65%,#0f2644 100%)' }}
-    >
-      <style>{`
-        .auth-input::placeholder { color: rgba(148,163,184,0.55) !important; opacity: 1; }
-        .auth-input { color: #f1f5f9 !important; }
-        .auth-input:focus { outline: none; border-color: rgba(14,165,233,0.6) !important; box-shadow: 0 0 0 3px rgba(14,165,233,0.12) !important; }
-      `}</style>
-
-      {/* Grid */}
-      <div className="absolute inset-0 pointer-events-none"
-        style={{ backgroundImage: 'linear-gradient(rgba(14,165,233,0.06) 1px,transparent 1px),linear-gradient(90deg,rgba(14,165,233,0.06) 1px,transparent 1px)', backgroundSize: '40px 40px' }} />
-
-      {/* Orbs */}
-      <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle,rgba(14,165,233,0.12) 0%,transparent 65%)' }} />
-      <div className="absolute -bottom-16 -left-16 w-72 h-72 rounded-full blur-3xl pointer-events-none"
-        style={{ background: 'radial-gradient(circle,rgba(99,102,241,0.14) 0%,transparent 65%)' }} />
-
-      {/* Card */}
-      <div
-        className="relative z-10 w-full max-w-sm rounded-2xl p-7"
-        style={{
-          background: 'rgba(15,38,68,0.88)',
-          backdropFilter: 'blur(24px)',
-          border: '1px solid rgba(56,189,248,0.15)',
-          boxShadow: '0 24px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.07)',
-        }}
-      >
-        {/* Top glow line */}
-        <div className="absolute top-0 left-5 right-5 h-px rounded-full pointer-events-none"
-          style={{ background: 'linear-gradient(90deg,transparent,rgba(14,165,233,0.6),rgba(139,92,246,0.6),transparent)' }} />
-
+    <div style={{ minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', position:'relative', overflow:'hidden', padding:16, background:'linear-gradient(160deg,#1C1609 0%,#100D05 40%,#1C1609 70%,#0A0804 100%)' }}>
+      <style>{`.gold-input::placeholder{color:rgba(168,136,72,0.45)!important;opacity:1}.gold-input{color:#F5E4B8!important}.gold-input:focus{outline:none!important;border-color:rgba(201,168,76,0.55)!important;box-shadow:0 0 0 3px rgba(201,168,76,0.1)!important}@keyframes jk-spin{to{transform:rotate(360deg)}}`}</style>
+ 
+      <div style={{ position:'absolute', inset:0, pointerEvents:'none', backgroundImage:'linear-gradient(rgba(201,168,76,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,0.04) 1px,transparent 1px)', backgroundSize:'48px 48px' }} />
+      <div style={{ position:'absolute', top:-80, right:-80, width:320, height:320, borderRadius:'50%', pointerEvents:'none', background:'radial-gradient(circle,rgba(201,168,76,0.09) 0%,transparent 65%)', filter:'blur(32px)' }} />
+      <div style={{ position:'absolute', bottom:-60, left:-60, width:280, height:280, borderRadius:'50%', pointerEvents:'none', background:'radial-gradient(circle,rgba(139,105,20,0.1) 0%,transparent 65%)', filter:'blur(32px)' }} />
+ 
+      <div style={{ position:'relative', zIndex:10, width:'100%', maxWidth:380, borderRadius:24, padding:'32px 28px', background:'rgba(20,16,8,0.92)', backdropFilter:'blur(24px)', border:`1px solid ${GC.goldDim}`, boxShadow:'0 24px 80px rgba(0,0,0,0.7)' }}>
+        <div style={{ position:'absolute', top:0, left:'10%', right:'10%', height:2, background:`linear-gradient(90deg,transparent,${GC.gold},transparent)`, borderRadius:2 }} />
+ 
         {/* Icon + Title */}
-        <div className="flex flex-col items-center text-center mb-6">
-          <div
-            className="w-11 h-11 rounded-xl flex items-center justify-center mb-3"
-            style={{
-              background: 'linear-gradient(135deg,rgba(14,165,233,0.22),rgba(99,102,241,0.22))',
-              border: '1px solid rgba(14,165,233,0.28)',
-              boxShadow: '0 0 20px rgba(14,165,233,0.12)',
-            }}
-          >
-            <User className="w-5 h-5" style={{ color: '#38bdf8' }} />
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', textAlign:'center', marginBottom:28 }}>
+          <div style={{ width:46, height:46, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', marginBottom:14, background:'linear-gradient(135deg,rgba(201,168,76,0.2),rgba(139,105,20,0.25))', border:`1px solid ${GC.goldDim}` }}>
+            <User style={{ width:20, height:20, color:GC.gold }} />
           </div>
-          <h2 className="text-lg font-bold" style={{ color: '#f1f5f9' }}>Complete your profile</h2>
-          <p className="text-sm mt-1" style={{ color: 'rgba(148,163,184,0.65)' }}>Please provide your details to continue</p>
+          <h2 style={{ fontFamily:"'Playfair Display',serif", fontSize:20, fontWeight:700, color:GC.textPrimary, margin:'0 0 6px' }}>Complete your profile</h2>
+          <p style={{ fontFamily:"'DM Sans',sans-serif", fontSize:13, color:GC.textMuted }}>Please provide your details to continue</p>
         </div>
-
-        {/* Error */}
+ 
         {error && (
-          <div className="mb-4 px-3 py-2.5 rounded-lg text-sm border"
-            style={{ background: 'rgba(239,68,68,0.1)', borderColor: 'rgba(239,68,68,0.3)', color: '#fca5a5' }}>
-            {error}
-          </div>
+          <div style={{ marginBottom:16, padding:'10px 14px', borderRadius:10, fontSize:13, background:'rgba(180,60,40,0.12)', border:'1px solid rgba(180,60,40,0.3)', color:'#f87171', fontFamily:"'DM Sans',sans-serif" }}>{error}</div>
         )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* First Name */}
+ 
+        <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:14 }}>
+          {/* First name */}
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(148,163,184,0.8)' }}>First Name</label>
-            <input
-              type="text"
-              value={formData.firstName}
-              onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-              placeholder="Enter your first name"
-              required
-              className="auth-input w-full px-4 py-3 rounded-xl text-sm transition-all"
-              style={{ background: 'rgba(255,255,255,0.055)', border: '1px solid rgba(56,189,248,0.2)' }}
-            />
+            <label style={{ fontFamily:"'DM Sans',sans-serif", color:GC.textMuted, fontSize:11, textTransform:'uppercase', letterSpacing:'0.08em', display:'block', marginBottom:6 }}>First Name</label>
+            <div style={{ position:'relative' }}>
+              <User style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', width:16, height:16, color:GC.gold, pointerEvents:'none' }} />
+              <input type="text" value={formData.firstName} onChange={e=>setFormData({...formData,firstName:e.target.value})} placeholder="Enter your first name" required className="gold-input" style={inputStyle(true)} />
+            </div>
           </div>
-
-          {/* Last Name */}
+ 
+          {/* Last name */}
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(148,163,184,0.8)' }}>Last Name</label>
-            <input
-              type="text"
-              value={formData.lastName}
-              onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-              placeholder="Enter your last name"
-              required
-              className="auth-input w-full px-4 py-3 rounded-xl text-sm transition-all"
-              style={{ background: 'rgba(255,255,255,0.055)', border: '1px solid rgba(56,189,248,0.2)' }}
-            />
+            <label style={{ fontFamily:"'DM Sans',sans-serif", color:GC.textMuted, fontSize:11, textTransform:'uppercase', letterSpacing:'0.08em', display:'block', marginBottom:6 }}>Last Name</label>
+            <div style={{ position:'relative' }}>
+              <User style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', width:16, height:16, color:GC.gold, pointerEvents:'none' }} />
+              <input type="text" value={formData.lastName} onChange={e=>setFormData({...formData,lastName:e.target.value})} placeholder="Enter your last name" required className="gold-input" style={inputStyle(true)} />
+            </div>
           </div>
-
+ 
           {/* Phone */}
           <div>
-            <label className="block text-xs font-medium mb-1.5" style={{ color: 'rgba(148,163,184,0.8)' }}>Phone Number</label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="+250 XXX XXX XXX"
-              className="auth-input w-full px-4 py-3 rounded-xl text-sm transition-all"
-              style={{ background: 'rgba(255,255,255,0.055)', border: '1px solid rgba(56,189,248,0.2)' }}
-            />
+            <label style={{ fontFamily:"'DM Sans',sans-serif", color:GC.textMuted, fontSize:11, textTransform:'uppercase', letterSpacing:'0.08em', display:'block', marginBottom:6 }}>Phone Number</label>
+            <div style={{ position:'relative' }}>
+              <Phone style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', width:16, height:16, color:GC.gold, pointerEvents:'none' }} />
+              <input type="tel" value={formData.phone} onChange={e=>setFormData({...formData,phone:e.target.value})} placeholder="+250 XXX XXX XXX" className="gold-input" style={inputStyle(true)} />
+            </div>
           </div>
-
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 border-none cursor-pointer transition-all"
-            style={{
-              background: loading ? 'rgba(14,165,233,0.5)' : 'linear-gradient(135deg,#0EA5E9,#6366F1)',
-              color: '#ffffff',
-              boxShadow: '0 4px 20px rgba(14,165,233,0.35)',
-              opacity: loading ? 0.7 : 1,
-            }}
-          >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 rounded-full border-2 border-t-white animate-spin"
-                  style={{ borderColor: 'rgba(255,255,255,0.3)', borderTopColor: 'white' }} />
-                Saving...
-              </>
-            ) : 'Complete Profile'}
+ 
+          <button type="submit" disabled={loading}
+            style={{ width:'100%', padding:'13px', borderRadius:12, fontWeight:700, fontSize:14, display:'flex', alignItems:'center', justifyContent:'center', gap:8, border:'none', cursor:loading?'not-allowed':'pointer', background:loading?'rgba(201,168,76,0.4)':'linear-gradient(135deg,#8B6914,#C9A84C)', color:'#1C1609', opacity:loading?0.7:1, fontFamily:"'DM Sans',sans-serif", boxShadow:'0 4px 20px rgba(201,168,76,0.25)', marginTop:4 }}>
+            {loading ? <><div style={{ width:16,height:16,borderRadius:'50%',border:'2px solid rgba(28,22,9,0.3)',borderTopColor:'#1C1609',animation:'jk-spin 0.8s linear infinite' }} />Saving...</> : 'Complete Profile'}
           </button>
         </form>
       </div>
     </div>
   );
 };
-
+ 
 export default CompleteProfilePage;
