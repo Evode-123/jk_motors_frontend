@@ -2,6 +2,17 @@ export const API_BASE_URL    = process.env.REACT_APP_API_BASE_URL    || 'http://
 export const STATIC_BASE_URL = process.env.REACT_APP_STATIC_BASE_URL || 'http://localhost:8080';
 export const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '';
 
+// ✅ FIXED: Smart image URL helper.
+// Old images stored as "/uploads/services/abc.jpg" get the base URL prepended.
+// New Cloudinary images already start with "https://" so nothing is prepended.
+export const getImageUrl = (imageUrl) => {
+  if (!imageUrl) return null;
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl; // Cloudinary URL — already absolute, use as-is
+  }
+  return `${STATIC_BASE_URL}${imageUrl}`; // legacy local path — prepend base
+};
+
 export const USER_ROLES = { ADMIN: 'ADMIN', CLIENT: 'CLIENT' };
 
 export const STORAGE_KEYS = {
@@ -43,36 +54,12 @@ export const STATUS_LABELS = {
 };
 
 export const STATUS_COLORS = {
-  PENDING:   {
-    bg:     'rgba(201,168,76,0.12)',
-    text:   '#C9A84C',
-    border: 'rgba(201,168,76,0.3)',
-  },
-  APPROVED:  {
-    bg:     'rgba(168,136,72,0.1)',
-    text:   '#E8C96A',
-    border: 'rgba(201,168,76,0.35)',
-  },
-  CONFIRMED: {
-    bg:     'rgba(34,120,80,0.12)',
-    text:   '#6ee7b7',
-    border: 'rgba(34,120,80,0.3)',
-  },
-  REJECTED:  {
-    bg:     'rgba(180,60,40,0.1)',
-    text:   '#f87171',
-    border: 'rgba(180,60,40,0.28)',
-  },
-  CANCELLED: {
-    bg:     'rgba(80,70,50,0.15)',
-    text:   '#a89060',
-    border: 'rgba(120,100,60,0.25)',
-  },
-  COMPLETED: {
-    bg:     'rgba(34,120,80,0.12)',
-    text:   '#6ee7b7',
-    border: 'rgba(34,120,80,0.3)',
-  },
+  PENDING:   { bg: 'rgba(201,168,76,0.12)',  text: '#C9A84C',  border: 'rgba(201,168,76,0.3)'  },
+  APPROVED:  { bg: 'rgba(168,136,72,0.1)',   text: '#E8C96A',  border: 'rgba(201,168,76,0.35)' },
+  CONFIRMED: { bg: 'rgba(34,120,80,0.12)',   text: '#6ee7b7',  border: 'rgba(34,120,80,0.3)'   },
+  REJECTED:  { bg: 'rgba(180,60,40,0.1)',    text: '#f87171',  border: 'rgba(180,60,40,0.28)'  },
+  CANCELLED: { bg: 'rgba(80,70,50,0.15)',    text: '#a89060',  border: 'rgba(120,100,60,0.25)' },
+  COMPLETED: { bg: 'rgba(34,120,80,0.12)',   text: '#6ee7b7',  border: 'rgba(34,120,80,0.3)'   },
 };
 
 export const THEME = {
@@ -99,12 +86,12 @@ export const THEME = {
     padding:      20,
   },
   input: {
-    background: 'rgba(20, 16, 8, 0.8)',
-    border:     '1px solid rgba(201,168,76,0.22)',
-    color:      '#E8D5A0',
+    background:   'rgba(20, 16, 8, 0.8)',
+    border:       '1px solid rgba(201,168,76,0.22)',
+    color:        '#E8D5A0',
     borderRadius: 12,
-    padding:    '10px 16px',
-    fontSize:   14,
+    padding:      '10px 16px',
+    fontSize:     14,
   },
   font: {
     heading: "'Playfair Display', 'Orbitron', serif",

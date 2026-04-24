@@ -1,10 +1,8 @@
-// ═══════════════════════════════════════════════════════
-// AdminCatalogManagement.jsx — Gold/Dark Royal Crest Theme
-// ═══════════════════════════════════════════════════════
 import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Edit, Trash2, Package, ImageIcon, X, Loader, ChevronDown, ChevronUp } from 'lucide-react';
 import apiService from '../../services/apiService';
-import { STATIC_BASE_URL } from '../../utils/constants';
+// ✅ FIXED: import getImageUrl instead of STATIC_BASE_URL
+import { getImageUrl } from '../../utils/constants';
 
 const G = { gold:'#C9A84C', goldLight:'#E8C96A', goldDim:'rgba(201,168,76,0.18)', goldDimmer:'rgba(201,168,76,0.09)', textPrimary:'#F5E4B8', textMuted:'rgba(168,136,72,0.75)', border:'rgba(201,168,76,0.16)', surface:'rgba(28,22,9,0.6)' };
 const FONT  = { fontFamily:"'DM Sans', sans-serif" };
@@ -19,15 +17,12 @@ const T = {
 const JKCard = ({ children, style={} }) => (
   <div style={{ background:G.surface, border:`1px solid ${G.border}`, borderRadius:16, overflow:'hidden', ...style }}>{children}</div>
 );
-
 const JKInput = ({ ...props }) => (
   <input {...props} style={{ background:'rgba(20,16,8,0.8)', border:`1px solid ${G.goldDim}`, color:G.textPrimary, borderRadius:12, padding:'10px 16px', fontSize:14, width:'100%', ...FONT, outline:'none' }} />
 );
-
 const JKTextarea = ({ rows=3, ...props }) => (
   <textarea rows={rows} {...props} style={{ background:'rgba(20,16,8,0.8)', border:`1px solid ${G.goldDim}`, color:G.textPrimary, borderRadius:12, padding:'10px 16px', fontSize:14, width:'100%', ...FONT, outline:'none', resize:'none' }} />
 );
-
 const ModalShell = ({ title, onClose, children }) => (
   <div style={{ position:'fixed', inset:0, zIndex:50, display:'flex', alignItems:'center', justifyContent:'center', padding:16, background:'rgba(0,0,0,0.82)', backdropFilter:'blur(6px)' }}>
     <div style={{ background:'linear-gradient(160deg,#100D05,#1C1609)', border:`1px solid ${G.goldDim}`, borderRadius:20, width:'100%', maxWidth:480, maxHeight:'90vh', display:'flex', flexDirection:'column' }}>
@@ -39,7 +34,6 @@ const ModalShell = ({ title, onClose, children }) => (
     </div>
   </div>
 );
-
 const FormActions = ({ onClose, loading, label }) => (
   <div style={{ display:'flex', gap:12, marginTop:8 }}>
     <button type="button" onClick={onClose} disabled={loading}
@@ -116,8 +110,9 @@ export default function AdminCatalogManagement() {
           <JKCard key={svc.id}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'20px', borderBottom:expanded===svc.id?`1px solid ${G.border}`:'none' }}>
               <div style={{ display:'flex', alignItems:'center', gap:16 }}>
-                {svc.imageUrl ? (
-                  <img src={`${STATIC_BASE_URL}${svc.imageUrl}`} alt={svc.name} style={{ width:56, height:56, borderRadius:12, objectFit:'cover', border:`1px solid ${G.goldDim}` }} />
+                {/* ✅ FIXED: use getImageUrl */}
+                {getImageUrl(svc.imageUrl) ? (
+                  <img src={getImageUrl(svc.imageUrl)} alt={svc.name} style={{ width:56, height:56, borderRadius:12, objectFit:'cover', border:`1px solid ${G.goldDim}` }} />
                 ) : (
                   <div style={{ width:56, height:56, borderRadius:12, background:G.goldDimmer, border:`1px solid ${G.border}`, display:'flex', alignItems:'center', justifyContent:'center', fontSize:24 }}>🔧</div>
                 )}
@@ -160,8 +155,9 @@ export default function AdminCatalogManagement() {
                   <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))', gap:12 }}>
                     {svc.products.map(prd => (
                       <div key={prd.id} style={{ background:'rgba(20,16,8,0.7)', border:`1px solid ${G.border}`, borderRadius:12, overflow:'hidden' }}>
-                        {prd.imageUrl ? (
-                          <img src={`${STATIC_BASE_URL}${prd.imageUrl}`} alt={prd.name} style={{ width:'100%', height:112, objectFit:'cover' }} />
+                        {/* ✅ FIXED: use getImageUrl */}
+                        {getImageUrl(prd.imageUrl) ? (
+                          <img src={getImageUrl(prd.imageUrl)} alt={prd.name} style={{ width:'100%', height:112, objectFit:'cover' }} />
                         ) : (
                           <div style={{ width:'100%', height:80, background:G.goldDimmer, display:'flex', alignItems:'center', justifyContent:'center' }}>
                             <ImageIcon className="w-6 h-6" style={{ color:G.goldDim }} />
@@ -209,11 +205,11 @@ function ServiceFormModal({ service, onClose, onSaved }) {
   const [description,setDescription]=useState(service?.description??'');
   const [isActive,setIsActive]=useState(service?.isActive??true);
   const [imageFile,setImageFile]=useState(null);
-  const [preview,setPreview]=useState(service?.imageUrl?`${STATIC_BASE_URL}${service.imageUrl}`:null);
+  // ✅ FIXED: use getImageUrl for existing image preview
+  const [preview,setPreview]=useState(service?.imageUrl ? getImageUrl(service.imageUrl) : null);
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState('');
   const fileRef=useRef();
-  const G2 = { gold:'#C9A84C', goldDim:'rgba(201,168,76,0.18)', goldDimmer:'rgba(201,168,76,0.09)', textPrimary:'#F5E4B8', textMuted:'rgba(168,136,72,0.75)', border:'rgba(201,168,76,0.16)' };
 
   const handleFile = (e) => { const f=e.target.files?.[0]; if(!f) return; setImageFile(f); setPreview(URL.createObjectURL(f)); };
 
@@ -236,11 +232,11 @@ function ServiceFormModal({ service, onClose, onSaved }) {
       <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:16 }}>
         <div>
           <label style={T.label}>Service Image</label>
-          <div onClick={() => fileRef.current?.click()} style={{ width:'100%', height:144, borderRadius:12, border:`2px dashed rgba(201,168,76,0.3)`, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', overflow:'hidden', background:preview?'none':G2.goldDimmer }}>
+          <div onClick={() => fileRef.current?.click()} style={{ width:'100%', height:144, borderRadius:12, border:`2px dashed rgba(201,168,76,0.3)`, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', overflow:'hidden', background:preview?'none':G.goldDimmer }}>
             {preview ? <img src={preview} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : (
               <div style={{ textAlign:'center' }}>
-                <ImageIcon className="w-8 h-8 mx-auto mb-1" style={{ color:G2.goldDim }} />
-                <p style={{ ...FONT, fontSize:12, color:G2.textMuted }}>Click to upload image</p>
+                <ImageIcon className="w-8 h-8 mx-auto mb-1" style={{ color:G.goldDim }} />
+                <p style={{ ...FONT, fontSize:12, color:G.textMuted }}>Click to upload image</p>
               </div>
             )}
           </div>
@@ -265,11 +261,11 @@ function ProductFormModal({ serviceId, product, onClose, onSaved }) {
   const [name,setName]=useState(product?.name??'');
   const [description,setDescription]=useState(product?.description??'');
   const [imageFile,setImageFile]=useState(null);
-  const [preview,setPreview]=useState(product?.imageUrl?`${STATIC_BASE_URL}${product.imageUrl}`:null);
+  // ✅ FIXED: use getImageUrl for existing image preview
+  const [preview,setPreview]=useState(product?.imageUrl ? getImageUrl(product.imageUrl) : null);
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState('');
   const fileRef=useRef();
-  const G2 = { gold:'#C9A84C', goldDim:'rgba(201,168,76,0.18)', goldDimmer:'rgba(201,168,76,0.09)', textPrimary:'#F5E4B8', textMuted:'rgba(168,136,72,0.75)' };
 
   const handleFile = (e) => { const f=e.target.files?.[0]; if(!f) return; setImageFile(f); setPreview(URL.createObjectURL(f)); };
 
@@ -292,11 +288,11 @@ function ProductFormModal({ serviceId, product, onClose, onSaved }) {
       <form onSubmit={handleSubmit} style={{ display:'flex', flexDirection:'column', gap:16 }}>
         <div>
           <label style={T.label}>Product Image</label>
-          <div onClick={() => fileRef.current?.click()} style={{ width:'100%', height:128, borderRadius:12, border:`2px dashed rgba(201,168,76,0.3)`, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', overflow:'hidden', background:G2.goldDimmer }}>
+          <div onClick={() => fileRef.current?.click()} style={{ width:'100%', height:128, borderRadius:12, border:`2px dashed rgba(201,168,76,0.3)`, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', overflow:'hidden', background:G.goldDimmer }}>
             {preview ? <img src={preview} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : (
               <div style={{ textAlign:'center' }}>
-                <ImageIcon className="w-7 h-7 mx-auto mb-1" style={{ color:G2.goldDim }} />
-                <p style={{ ...FONT, fontSize:12, color:G2.textMuted }}>Click to upload</p>
+                <ImageIcon className="w-7 h-7 mx-auto mb-1" style={{ color:G.goldDim }} />
+                <p style={{ ...FONT, fontSize:12, color:G.textMuted }}>Click to upload</p>
               </div>
             )}
           </div>
@@ -314,7 +310,6 @@ function ProductFormModal({ serviceId, product, onClose, onSaved }) {
 function DeleteConfirmModal({ item, onClose, onDeleted }) {
   const [loading,setLoading]=useState(false);
   const [error,setError]=useState('');
-  const G2 = { goldDim:'rgba(201,168,76,0.18)', goldDimmer:'rgba(201,168,76,0.09)', textPrimary:'#F5E4B8', border:'rgba(201,168,76,0.16)' };
 
   const handleDelete = async () => {
     setLoading(true); setError('');
@@ -331,7 +326,7 @@ function DeleteConfirmModal({ item, onClose, onDeleted }) {
         <div style={{ width:56, height:56, borderRadius:'50%', background:'rgba(180,60,40,0.1)', border:'1px solid rgba(180,60,40,0.2)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' }}>
           <Trash2 className="w-6 h-6" style={{ color:'#f87171' }} />
         </div>
-        <p style={{ ...FONT, fontSize:14, color:G2.textPrimary }}>
+        <p style={{ ...FONT, fontSize:14, color:G.textPrimary }}>
           Delete <strong>"{item.item.name}"</strong>?
           {item.type==='service' && ' All products will also be deleted.'}
           {' '}This cannot be undone.
@@ -340,7 +335,7 @@ function DeleteConfirmModal({ item, onClose, onDeleted }) {
       {error && <p style={{ color:'#f87171', fontSize:12, textAlign:'center', marginTop:8 }}>{error}</p>}
       <div style={{ display:'flex', gap:12, marginTop:24 }}>
         <button onClick={onClose} disabled={loading}
-          style={{ flex:1, padding:'10px', borderRadius:12, background:'transparent', border:`1px solid ${G2.goldDim}`, color:'rgba(168,136,72,0.75)', ...FONT, fontSize:13, fontWeight:600, cursor:'pointer', opacity:loading?0.5:1 }}>
+          style={{ flex:1, padding:'10px', borderRadius:12, background:'transparent', border:`1px solid ${G.goldDim}`, color:'rgba(168,136,72,0.75)', ...FONT, fontSize:13, fontWeight:600, cursor:'pointer', opacity:loading?0.5:1 }}>
           Cancel
         </button>
         <button onClick={handleDelete} disabled={loading}
