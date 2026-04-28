@@ -133,8 +133,6 @@ export default function LandingPage() {
             <div>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-8"
                 style={{ background: 'rgba(201,168,76,.07)', borderColor: 'rgba(201,168,76,.25)' }}>
-                <div className="live-dot w-2 h-2 rounded-full" style={{ background: '#C9A84C', boxShadow: '0 0 8px rgba(201,168,76,.8)' }} />
-                <span className="font-body text-[13px] font-medium" style={{ color: '#C9A84C' }}>Toronto's Trusted Auto Parts & Service</span>
               </div>
               <h1 className="font-tech font-black leading-tight mb-4 text-white" style={{ fontSize: 'clamp(38px,5.5vw,72px)' }}>
                 YOUR CAR<br /><span className="text-grad">DESERVES<br />THE BEST</span>
@@ -225,7 +223,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── SERVICES PREVIEW ── */}
-      <section id="preview-services" className="py-24 px-6" style={{ background: '#161009' }}>
+      <section id="preview-services" className="py-18 px-6" style={{ background: '#161009' }}>
         <div className="max-w-6xl mx-auto">
           <div id="sv-h" data-animate className={`text-center mb-16 ${rev('sv-h')}`}>
             <div className="flex items-center justify-center gap-4 mb-4">
@@ -280,7 +278,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="py-24 px-6" style={{ background: '#1C1510' }}>
+      <section className="py-18 px-6" style={{ background: '#1C1510' }}>
         <div className="max-w-5xl mx-auto">
           <div id="how-h" data-animate className={`text-center mb-14 ${rev('how-h')}`}>
             <div className="flex items-center justify-center gap-4 mb-4">
@@ -406,7 +404,6 @@ export default function LandingPage() {
         <section className="py-20 px-6 text-center"
           style={{ background: 'linear-gradient(135deg,#161009,#2A1E0E,#161009)', borderTop: '1px solid rgba(201,168,76,.15)' }}>
           <div className="max-w-xl mx-auto">
-            <div className="text-4xl mb-5">🏆</div>
             <h2 className="font-tech font-black text-white mb-4" style={{ fontSize: 'clamp(24px,5vw,48px)' }}>READY TO GET STARTED?</h2>
             <p className="font-body text-slate-400 text-[15px] mb-9">Sign up in seconds. Browse services, place orders, and track your vehicle's full service history — all in one place.</p>
             <div className="flex flex-wrap justify-center gap-4">

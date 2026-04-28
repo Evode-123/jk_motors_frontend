@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
   LogOut, Bell, Menu, User,
@@ -8,6 +8,10 @@ import { useAuth }          from '../../context/AuthContext';
 import { USER_ROLES }       from '../../utils/constants';
 import { useNotifications } from '../../services/useNotifications';
 import apiService           from '../../services/apiService';
+import { useSessionManager } from '../../hooks/useSessionManager';
+import SessionModal          from '../common/SessionModal';
+
+const WARNING_SECONDS = 5 * 60; // must match useSessionManager WARNING_BEFORE_MS / 1000
 
 const G = {
   gold:       '#C9A84C',
@@ -84,29 +88,55 @@ function SidebarAvatar({ user }) {
 }
 
 const DashboardLayout = ({ children }) => {
-  const { user, logout } = useAuth();
-  const navigate         = useNavigate();
-  const location         = useLocation();
+  const { user, logout }  = useAuth();
+  const navigate          = useNavigate();
+  const location          = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileOpen,  setMobileOpen]  = useState(false);
+  const [extending,   setExtending]   = useState(false);
 
   const { unreadCount } = useNotifications(user?.id);
   const [adminFeedbackUnread, setAdminFeedbackUnread] = useState(0);
-  const [adminContactUnread, setAdminContactUnread]   = useState(0);
+  const [adminContactUnread,  setAdminContactUnread]  = useState(0);
 
-  useEffect(() => {
+  // ── Session management ─────────────────────────────────────────────────────
+  // onExpire is called when the inactivity countdown hits 0 (not needed here
+  // because the modal already shows "expired" state automatically)
+  const handleExtend = useCallback(async () => {
+    setExtending(true);
+    try {
+      await apiService.refreshSession();
+    } catch {
+      // refresh failed — treat as expired, log out
+      await logout();
+      navigate('/login', { replace: true });
+    } finally {
+      setExtending(false);
+    }
+  }, [logout, navigate]);
+
+  const handleLogout = useCallback(async () => {
+    sessionModal.dismiss();
+    await logout();
+    navigate('/login', { replace: true });
+  }, [logout, navigate]); // eslint-disable-line
+
+  const sessionModal = useSessionManager({
+    isAuthenticated: !!user,
+    onExtend:        handleExtend,
+    onExpire:        () => {}, // modal handles it visually
+  });
+
+  // ── Notifications ──────────────────────────────────────────────────────────
+  React.useEffect(() => {
     if (user?.role === USER_ROLES.ADMIN) {
-      apiService.adminGetFeedbackUnreadCount()
-        .then(n => setAdminFeedbackUnread(n))
-        .catch(() => {});
+      apiService.adminGetFeedbackUnreadCount().then(n => setAdminFeedbackUnread(n)).catch(() => {});
     }
   }, [user]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (user?.role === USER_ROLES.ADMIN) {
-      apiService.adminGetContactUnreadCount()
-        .then(n => setAdminContactUnread(n))
-        .catch(() => {});
+      apiService.adminGetContactUnreadCount().then(n => setAdminContactUnread(n)).catch(() => {});
     }
   }, [user]);
 
@@ -139,7 +169,7 @@ const DashboardLayout = ({ children }) => {
     return user?.email || 'User';
   };
 
-  const handleLogout = async () => {
+  const handleLogoutClick = async () => {
     await logout();
     navigate('/');
   };
@@ -245,7 +275,7 @@ const DashboardLayout = ({ children }) => {
 
         {/* Logout */}
         <div style={{ padding: '12px', borderTop: `1px solid ${G.border}` }}>
-          <button onClick={handleLogout}
+          <button onClick={handleLogoutClick}
             title={!showLabels ? 'Logout' : undefined}
             style={{
               width: '100%', display: 'flex', alignItems: 'center', gap: 10,
@@ -263,7 +293,7 @@ const DashboardLayout = ({ children }) => {
     );
   };
 
-  const sidebarBg = `linear-gradient(180deg, ${G.surface} 0%, ${G.surface2} 100%)`;
+  const sidebarBg     = `linear-gradient(180deg, ${G.surface} 0%, ${G.surface2} 100%)`;
   const sidebarBorder = `1px solid ${G.border}`;
 
   return (
@@ -389,6 +419,20 @@ const DashboardLayout = ({ children }) => {
           </main>
         </div>
       </div>
+
+      {/* ── Session timeout modal — rendered outside the layout flow so it's always on top ── */}
+      <SessionModal
+        phase={sessionModal.phase}
+        countdown={sessionModal.countdown}
+        maxCountdown={WARNING_SECONDS}
+        onExtend={sessionModal.extend}
+        onLogout={async () => {
+          sessionModal.dismiss();
+          await logout();
+          navigate('/login', { replace: true });
+        }}
+        extending={extending}
+      />
     </>
   );
 };

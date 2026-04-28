@@ -31,7 +31,6 @@ class ApiService {
     const token    = getAccessToken();
     const isPublic = PUBLIC_ENDPOINTS.some(p => endpoint.startsWith(p));
 
-    // For multipart/form-data, don't set Content-Type (browser sets it with boundary)
     const isFormData = options.body instanceof FormData;
     const headers = {
       ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
@@ -51,9 +50,15 @@ class ApiService {
       if (response.status === 401 && retry && !this._refreshing && !isPublic) {
         const refreshed = await this._tryRefresh();
         if (refreshed) return this.request(endpoint, options, false);
+
+        // ── FIX: fire an event instead of hard-redirecting ──────────────────
+        // window.location.href = '/login' causes a full page reload which
+        // breaks React Router and shows a white screen.
+        // Instead we dispatch a custom event that the React app listens to
+        // and handles gracefully through the router.
         clearTokens();
-        window.location.href = '/login';
-        return;
+        window.dispatchEvent(new CustomEvent('auth:session-expired'));
+        return; // stop the current request
       }
 
       if (!response.ok) {
@@ -85,6 +90,28 @@ class ApiService {
       return true;
     } catch { return false; }
     finally { this._refreshing = false; }
+  }
+
+  // ── Called by useSessionManager "Stay Logged In" button ─────────────────────
+  // Manually triggers a token refresh to reset the expiry clock
+  async refreshSession() {
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) throw new Error('No active session to extend.');
+
+    const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ refreshToken }),
+    });
+
+    if (!res.ok) {
+      clearTokens();
+      throw new Error('Session could not be extended. Please log in again.');
+    }
+
+    const data = await res.json();
+    saveTokens(data.data.accessToken, data.data.refreshToken);
+    return true;
   }
 
   _statusMessage(status) {
@@ -224,7 +251,7 @@ class ApiService {
 
   async adminCreateService(formData) {
     return this.request('/services', {
-      method: 'POST', body: formData, // FormData
+      method: 'POST', body: formData,
     });
   }
 
@@ -328,8 +355,6 @@ class ApiService {
     });
   }
 
-  // SSE stream — returns EventSource-compatible URL with token in header workaround
-  // We use fetchEventSource from @microsoft/fetch-event-source in the hook
   getNotificationStreamUrl() {
     return `${API_BASE_URL}/notifications/stream`;
   }
@@ -344,9 +369,7 @@ class ApiService {
       body: JSON.stringify(data),
     });
   }
- 
-  // ── Contact management (admin only) ───────────────────────────────────────
- 
+
   async adminGetContacts(filters = {}) {
     const params = new URLSearchParams();
     if (filters.isRead !== undefined) params.set('isRead', String(filters.isRead));
@@ -354,12 +377,12 @@ class ApiService {
     const res = await this.request(`/contact${query ? `?${query}` : ''}`);
     return res.data;
   }
- 
+
   async adminGetContact(id) {
     const res = await this.request(`/contact/${id}`);
     return res.data;
   }
- 
+
   async adminMarkContactRead(id, isRead = true) {
     const res = await this.request(`/contact/${id}/read`, {
       method: 'PATCH',
@@ -367,15 +390,15 @@ class ApiService {
     });
     return res.data;
   }
- 
+
   async adminMarkAllContactsRead() {
     return this.request('/contact/mark-all-read', { method: 'POST' });
   }
- 
+
   async adminDeleteContact(id) {
     return this.request(`/contact/${id}`, { method: 'DELETE' });
   }
- 
+
   async adminGetContactUnreadCount() {
     const res = await this.request('/contact/unread-count');
     return res.data.count;
@@ -385,6 +408,7 @@ class ApiService {
     const res = await this.request(`/analytics/summary?days=${days}`);
     return res.data;
   }
+
   async getAnalyticsVisits(page = 1, limit = 50) {
     const res = await this.request(`/analytics/visits?page=${page}&limit=${limit}`);
     return res.data;
@@ -397,19 +421,17 @@ class ApiService {
     });
     return res.data;
   }
-  
+
   async getMyFeedbacks() {
     const res = await this.request('/feedback/my');
     return res.data;
   }
-  
+
   async checkOrderFeedback(orderId) {
     const res = await this.request(`/feedback/check/${orderId}`);
     return res.data.hasReview;
   }
-  
-  // ── Admin: Feedback ───────────────────────────────────────────────────────────
-  
+
   async adminGetFeedbacks(filters = {}) {
     const params = new URLSearchParams();
     if (filters.status  !== undefined) params.set('status',  filters.status);
@@ -418,17 +440,17 @@ class ApiService {
     const res = await this.request(`/feedback${query ? `?${query}` : ''}`);
     return res.data;
   }
-  
+
   async adminGetFeedbackStats() {
     const res = await this.request('/feedback/stats');
     return res.data;
   }
-  
+
   async adminGetFeedbackUnreadCount() {
     const res = await this.request('/feedback/unread-count');
     return res.data.count;
   }
-  
+
   async adminRespondToFeedback(id, response) {
     const res = await this.request(`/feedback/${id}/respond`, {
       method: 'POST',
@@ -436,16 +458,15 @@ class ApiService {
     });
     return res.data;
   }
-  
+
   async adminMarkFeedbackRead(id) {
     const res = await this.request(`/feedback/${id}/read`, { method: 'PATCH' });
     return res.data;
   }
-  
+
   async adminDeleteFeedback(id) {
     return this.request(`/feedback/${id}`, { method: 'DELETE' });
   }
-
 }
 
 const apiService = new ApiService();
