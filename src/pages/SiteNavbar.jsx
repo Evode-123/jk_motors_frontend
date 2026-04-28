@@ -48,19 +48,25 @@ export default function SiteNavbar({ transparent = false }) {
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between h-[70px]">
 
-          {/* Logo — image only, no duplicate text */}
-          <Link to="/" className="flex items-center no-underline">
-            <img
-              src="/jk_logo.jpeg"
-              alt="JK Motors"
-              className="rounded-lg object-cover flex-shrink-0"
-              style={{
-                width: 48,
-                height: 48,
-                boxShadow: '0 0 20px rgba(201,168,76,0.4)',
-                border: '1px solid rgba(201,168,76,0.3)',
-              }}
-            />
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-3 no-underline">
+            <img src="/jk_logo.jpeg" alt="JK Motors Logo"
+              className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+              style={{ boxShadow: '0 0 16px rgba(201,168,76,0.35)', border: '1px solid rgba(201,168,76,0.25)' }} />
+            <div>
+              <div
+                className="snav-font-tech font-black text-base text-white leading-none"
+                style={{ letterSpacing: '0.18em' }}
+              >
+                JK MOTORS
+              </div>
+              <div
+                className="snav-font-body text-[9px] uppercase leading-none mt-1"
+                style={{ color: '#C9A84C', letterSpacing: '0.28em' }}
+              >
+                Auto Parts &amp; Service
+              </div>
+            </div>
           </Link>
 
           {/* Desktop nav links */}
