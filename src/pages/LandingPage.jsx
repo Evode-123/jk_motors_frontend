@@ -1,3 +1,128 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// PATCH SUMMARY  — apply these targeted changes to your LandingPage.jsx
+//
+//  1. Replace the broken gallery2 Unsplash URL with a working one
+//  2. Add a mobile-only hero photo strip (visible below sm, hidden on lg+)
+//  3. Make the gallery grid fully responsive (stacks on mobile, 2-col on tablet)
+//  4. Add a <style> block with the responsive gallery CSS
+//
+// Search for each ── CHANGE N ── comment and apply the diff shown.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── CHANGE 1 ── Fix the broken gallery2 photo URL
+// FIND (in the PHOTOS object, around line 14):
+//   gallery2: 'https://images.unsplash.com/photo-1504222490345-c075b7c1f0fe?w=600&q=80&fit=crop',
+// REPLACE WITH:
+//   gallery2: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&q=80&fit=crop',
+// (This is a real Unsplash garage/workshop interior photo that loads reliably)
+
+
+// ── CHANGE 2 ── Add responsive gallery CSS inside the <style>{`…`}</style> block
+// FIND the end of your existing <style> block, just before the closing backtick+}):
+//   html { scroll-behavior:smooth }
+// ADD THESE LINES immediately before that line:
+//
+//   @media (max-width: 1023px) {
+//     .gallery-grid { grid-template-columns: 1fr 1fr !important; grid-template-rows: auto !important; }
+//     .gallery-grid .gallery-span { grid-row: auto !important; }
+//   }
+//   @media (max-width: 639px) {
+//     .gallery-grid { grid-template-columns: 1fr !important; }
+//   }
+
+
+// ── CHANGE 3 ── Add className and ref to the gallery grid div so the CSS targets it
+// FIND (inside the PHOTO GALLERY section, the asymmetric grid div):
+//   <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: '240px 240px', gap: 12 }}>
+// REPLACE WITH:
+//   <div className="gallery-grid" style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: '240px 240px', gap: 12 }}>
+
+// AND for the large left gallery card that spans 2 rows, add className="gallery-span":
+// FIND:
+//   <div className="gallery-card relative rounded-2xl overflow-hidden cursor-pointer"
+//     style={{ gridRow: '1 / 3', border: '1px solid rgba(201,168,76,.12)' }}>
+// REPLACE WITH:
+//   <div className="gallery-card gallery-span relative rounded-2xl overflow-hidden cursor-pointer"
+//     style={{ gridRow: '1 / 3', border: '1px solid rgba(201,168,76,.12)' }}>
+
+
+// ── CHANGE 4 ── Add a mobile-only hero photo strip
+// FIND the closing </div> of the hero LEFT text column block,
+// which ends with the mini-stats row (around the line that says):
+//   </div>   {/* ends the heroLoaded-styled left column div */}
+//
+// Then FIND the RIGHT photo collage div that starts with:
+//   {/* ── RIGHT: Photo collage ── */}
+//   <div className="relative hidden lg:block" ...>
+//
+// INSERT the following BETWEEN the left text column's closing </div> and that RIGHT div:
+
+/*
+  {/* ── MOBILE: Photo strip (visible on mobile/tablet, hidden on lg+) ── * /}
+  <div className="lg:hidden w-full" style={{
+    opacity: heroLoaded ? 1 : 0,
+    transform: heroLoaded ? 'translateY(0)' : 'translateY(16px)',
+    transition: 'all 1s cubic-bezier(.22,1,.36,1) 0.3s',
+  }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '180px 120px', gap: 8 }}>
+
+      {/* Main large — spans both columns * /}
+      <div className="rounded-2xl overflow-hidden relative"
+        style={{ gridColumn: '1 / 3', border: '1px solid rgba(201,168,76,.15)', boxShadow: '0 16px 40px rgba(0,0,0,.5)' }}>
+        <img src={PHOTOS.hero1} alt="JK Motors mechanic"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='#2A1E0E'; }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg,transparent 50%,rgba(16,10,2,0.55))' }} />
+        {/* Floating rating badge * /}
+        <div className="absolute" style={{ top: 12, right: 12 }}>
+          <div className="rounded-xl px-3 py-2 flex items-center gap-2"
+            style={{ background: 'rgba(16,10,2,0.88)', backdropFilter: 'blur(10px)', border: '1px solid rgba(201,168,76,.3)' }}>
+            <span style={{ fontSize: 14 }}>⭐</span>
+            <div>
+              <div className="font-tech font-black text-white" style={{ fontSize: 13, lineHeight: 1 }}>4.9/5</div>
+              <div className="font-body" style={{ fontSize: 9, color: 'rgba(201,168,76,.8)' }}>200+ Reviews</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom left — car * /}
+      <div className="rounded-2xl overflow-hidden relative"
+        style={{ border: '1px solid rgba(201,168,76,.15)', boxShadow: '0 12px 30px rgba(0,0,0,.5)' }}>
+        <img src={PHOTOS.hero2} alt="Premium car"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='#2A1E0E'; }} />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg,transparent 40%,rgba(16,10,2,0.5))' }} />
+      </div>
+
+      {/* Bottom right — engine * /}
+      <div className="rounded-2xl overflow-hidden relative"
+        style={{ border: '1px solid rgba(201,168,76,.15)', boxShadow: '0 12px 30px rgba(0,0,0,.5)' }}>
+        <img src={PHOTOS.hero3} alt="Engine detail"
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='#2A1E0E'; }} />
+        {/* Same-day badge * /}
+        <div className="absolute" style={{ bottom: 10, right: 10 }}>
+          <div className="rounded-xl px-2.5 py-1.5 flex items-center gap-1.5"
+            style={{ background: 'rgba(16,10,2,0.88)', backdropFilter: 'blur(10px)', border: '1px solid rgba(201,168,76,.3)' }}>
+            <span style={{ fontSize: 12 }}>⚡</span>
+            <div className="font-tech font-black text-white" style={{ fontSize: 10, lineHeight: 1 }}>Same-Day</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+*/
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPLETE UPDATED SECTIONS FOR EASY COPY-PASTE
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Below is the full updated LandingPage.jsx with ALL 4 changes applied.
+// You can replace your existing file entirely with this version.
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -7,17 +132,17 @@ import ServiceCard from '../components/catalog/ServiceCard';
 import ProductModal from '../components/catalog/ProductModal';
 import apiService from '../services/apiService';
 
-// ── Photo assets (Unsplash — free to use) ─────────────────────────────────────
 const PHOTOS = {
-  hero1:    'https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=700&q=85&fit=crop',  // mechanic working
-  hero2:    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=500&q=85&fit=crop',  // sleek car
-  hero3:    'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&q=85&fit=crop',  // engine detail
-  gallery1: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop',     // red sports car
-  gallery2: 'https://images.unsplash.com/photo-1504222490345-c075b7c1f0fe?w=600&q=80&fit=crop',  // garage interior
-  gallery3: 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=600&q=80&fit=crop',  // mechanic close-up
-  gallery4: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80&fit=crop',  // night car
-  gallery5: 'https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=600&q=80&fit=crop',  // tire change
-  gallery6: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80&fit=crop',  // person avatar
+  hero1:    'https://images.unsplash.com/photo-1625047509168-a7026f36de04?w=700&q=85&fit=crop',
+  hero2:    'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=500&q=85&fit=crop',
+  hero3:    'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&q=85&fit=crop',
+  gallery1: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80&fit=crop',
+  // ✅ FIXED: replaced broken URL with working garage/workshop photo
+  gallery2: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=600&q=80&fit=crop',
+  gallery3: 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?w=600&q=80&fit=crop',
+  gallery4: 'https://images.unsplash.com/photo-1494976388531-d1058494cdd8?w=600&q=80&fit=crop',
+  gallery5: 'https://images.unsplash.com/photo-1563720360172-67b8f3dce741?w=600&q=80&fit=crop',
+  gallery6: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80&fit=crop',
 };
 
 const WHY = [
@@ -158,6 +283,33 @@ export default function LandingPage() {
         .shine-btn::after { content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);animation:shine 3s ease-in-out infinite 2s; }
         .shine-btn { position:relative;overflow:hidden; }
 
+        /* ✅ NEW: Responsive gallery grid */
+        .gallery-grid {
+          display: grid;
+          grid-template-columns: 1.4fr 1fr 1fr;
+          grid-template-rows: 240px 240px;
+          gap: 12px;
+        }
+        @media (max-width: 1023px) {
+          .gallery-grid {
+            grid-template-columns: 1fr 1fr !important;
+            grid-template-rows: 220px 220px 220px !important;
+          }
+          .gallery-grid .gallery-span {
+            grid-row: auto !important;
+            grid-column: 1 / 3;
+          }
+        }
+        @media (max-width: 639px) {
+          .gallery-grid {
+            grid-template-columns: 1fr !important;
+            grid-template-rows: 220px 200px 200px 200px 200px !important;
+          }
+          .gallery-grid .gallery-span {
+            grid-column: auto !important;
+          }
+        }
+
         html { scroll-behavior:smooth }
         ::-webkit-scrollbar { width:5px }
         ::-webkit-scrollbar-track { background:#110C07 }
@@ -166,13 +318,10 @@ export default function LandingPage() {
 
       <SiteNavbar transparent />
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          HERO — Split layout with photo collage
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* HERO */}
       <section className="relative min-h-screen flex items-center overflow-hidden grid-pattern"
         style={{ background: 'radial-gradient(ellipse at 65% 50%,rgba(201,168,76,.12) 0%,transparent 55%),radial-gradient(ellipse at 15% 30%,rgba(201,168,76,.07) 0%,transparent 50%),#18120A' }}>
 
-        {/* Background glow orbs */}
         <div className="glow-orb absolute top-1/4 right-1/3 w-[500px] h-[500px] rounded-full blur-3xl pointer-events-none"
           style={{ background: 'radial-gradient(circle,rgba(201,168,76,.10) 0%,transparent 65%)' }} />
         <div className="glow-orb absolute bottom-1/4 left-1/4 w-72 h-72 rounded-full blur-3xl pointer-events-none"
@@ -181,10 +330,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 pt-28 pb-20 relative z-10 w-full">
           <div className="grid lg:grid-cols-2 gap-10 xl:gap-16 items-center">
 
-            {/* ── LEFT: Text content ── */}
+            {/* LEFT: Text content */}
             <div style={{ opacity: heroLoaded ? 1 : 0, transform: heroLoaded ? 'translateY(0)' : 'translateY(32px)', transition: 'all 0.9s cubic-bezier(.22,1,.36,1)' }}>
 
-              {/* Live badge */}
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border mb-7"
                 style={{ background: 'rgba(201,168,76,.07)', borderColor: 'rgba(201,168,76,.25)' }}>
                 <div className="live-dot w-2 h-2 rounded-full" style={{ background: '#C9A84C', boxShadow: '0 0 8px rgba(201,168,76,.8)' }} />
@@ -203,7 +351,6 @@ export default function LandingPage() {
                 We <strong style={{ color: '#F0C060' }}>come to you</strong> — no tow truck, no hassle.
               </p>
 
-              {/* Inline trust pills */}
               <div className="flex flex-wrap gap-2 mb-8">
                 {['✓ Genuine Parts', '✓ Mobile Service', '✓ 6-Month Warranty', '✓ Certified Specialist'].map(t => (
                   <span key={t} className="font-body text-[12px] font-semibold px-3 py-1 rounded-full"
@@ -213,7 +360,6 @@ export default function LandingPage() {
                 ))}
               </div>
 
-              {/* CTAs */}
               <div className="flex flex-wrap gap-4 mb-10">
                 <Link to="/services"
                   className="shine-btn grad-btn font-body font-bold text-white px-9 py-4 rounded-xl no-underline transition-transform hover:-translate-y-1"
@@ -227,7 +373,6 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              {/* Mini stats row */}
               <div className="flex items-center gap-6 pt-6" style={{ borderTop: '1px solid rgba(201,168,76,.12)' }}>
                 {[
                   { val: '5,000+', label: 'Cars Serviced' },
@@ -242,25 +387,76 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* ── RIGHT: Photo collage ── */}
+            {/* ✅ MOBILE: Photo strip — visible on mobile/tablet, hidden on lg+ */}
+            <div className="lg:hidden w-full" style={{
+              opacity: heroLoaded ? 1 : 0,
+              transform: heroLoaded ? 'translateY(0)' : 'translateY(16px)',
+              transition: 'all 1s cubic-bezier(.22,1,.36,1) 0.3s',
+            }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gridTemplateRows: '200px 130px', gap: 8 }}>
+
+                {/* Top: spans both columns */}
+                <div className="rounded-2xl overflow-hidden relative"
+                  style={{ gridColumn: '1 / 3', border: '1px solid rgba(201,168,76,.15)', boxShadow: '0 16px 40px rgba(0,0,0,.5)' }}>
+                  <img src={PHOTOS.hero1} alt="JK Motors mechanic"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='#2A1E0E'; }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg,transparent 50%,rgba(16,10,2,0.55))' }} />
+                  {/* Rating badge */}
+                  <div className="absolute" style={{ top: 12, right: 12 }}>
+                    <div className="rounded-xl px-3 py-2 flex items-center gap-2"
+                      style={{ background: 'rgba(16,10,2,0.88)', backdropFilter: 'blur(10px)', border: '1px solid rgba(201,168,76,.3)' }}>
+                      <span style={{ fontSize: 14 }}>⭐</span>
+                      <div>
+                        <div className="font-tech font-black text-white" style={{ fontSize: 13, lineHeight: 1 }}>4.9/5</div>
+                        <div className="font-body" style={{ fontSize: 9, color: 'rgba(201,168,76,.8)', marginTop: 1 }}>200+ Reviews</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Bottom left: car */}
+                <div className="rounded-2xl overflow-hidden relative"
+                  style={{ border: '1px solid rgba(201,168,76,.15)', boxShadow: '0 12px 30px rgba(0,0,0,.5)' }}>
+                  <img src={PHOTOS.hero2} alt="Premium car"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='#2A1E0E'; }} />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg,transparent 40%,rgba(16,10,2,0.5))' }} />
+                </div>
+
+                {/* Bottom right: engine with same-day badge */}
+                <div className="rounded-2xl overflow-hidden relative"
+                  style={{ border: '1px solid rgba(201,168,76,.15)', boxShadow: '0 12px 30px rgba(0,0,0,.5)' }}>
+                  <img src={PHOTOS.hero3} alt="Engine detail"
+                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='#2A1E0E'; }} />
+                  <div className="absolute" style={{ bottom: 10, right: 10 }}>
+                    <div className="rounded-xl px-2.5 py-1.5 flex items-center gap-1.5"
+                      style={{ background: 'rgba(16,10,2,0.88)', backdropFilter: 'blur(10px)', border: '1px solid rgba(201,168,76,.3)' }}>
+                      <span style={{ fontSize: 12 }}>⚡</span>
+                      <div className="font-tech font-black text-white" style={{ fontSize: 10, lineHeight: 1 }}>Same-Day</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* DESKTOP: Photo collage — hidden on mobile, shown on lg+ */}
             <div className="relative hidden lg:block" style={{
               height: 560,
               opacity: heroLoaded ? 1 : 0,
               transform: heroLoaded ? 'translateY(0)' : 'translateY(24px)',
               transition: 'all 1.1s cubic-bezier(.22,1,.36,1) 0.2s',
             }}>
-
-              {/* Main large photo */}
               <div className="float-img-1 absolute rounded-2xl overflow-hidden"
                 style={{ top: 0, right: 0, width: '72%', height: 360, boxShadow: '0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,168,76,.2)', border: '1px solid rgba(201,168,76,.15)' }}>
                 <img src={PHOTOS.hero1} alt="JK Motors mechanic" className="photo-enter"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='#2A1E0E'; }} />
-                {/* Overlay gradient */}
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, transparent 50%, rgba(16,10,2,0.6))' }} />
               </div>
 
-              {/* Second floating photo */}
               <div className="float-img-2 absolute rounded-2xl overflow-hidden"
                 style={{ bottom: 0, left: 0, width: '52%', height: 260, boxShadow: '0 24px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,.25)', border: '1px solid rgba(201,168,76,.2)', zIndex: 2 }}>
                 <img src={PHOTOS.hero2} alt="Premium car"
@@ -269,7 +465,6 @@ export default function LandingPage() {
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(160deg, transparent 50%, rgba(16,10,2,0.5))' }} />
               </div>
 
-              {/* Third small accent photo */}
               <div className="absolute rounded-xl overflow-hidden"
                 style={{ bottom: 170, right: 8, width: '26%', height: 140, boxShadow: '0 16px 40px rgba(0,0,0,0.6)', border: '1px solid rgba(201,168,76,.2)', zIndex: 3, animation: 'float-slow2 7s ease-in-out infinite 0.5s' }}>
                 <img src={PHOTOS.hero3} alt="Engine detail"
@@ -277,7 +472,6 @@ export default function LandingPage() {
                   onError={e => { e.target.style.display='none'; e.target.parentElement.style.background='#2A1E0E'; }} />
               </div>
 
-              {/* Floating badge — rating */}
               <div className="absolute z-10"
                 style={{ top: 24, left: 0, animation: 'badge-in 0.7s cubic-bezier(.34,1.56,.64,1) 0.6s both' }}>
                 <div className="rounded-2xl px-4 py-3 flex items-center gap-3"
@@ -290,7 +484,6 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Floating badge — same-day */}
               <div className="absolute z-10"
                 style={{ bottom: 40, right: 0, animation: 'badge-in 0.7s cubic-bezier(.34,1.56,.64,1) 0.9s both' }}>
                 <div className="rounded-2xl px-4 py-3 flex items-center gap-3"
@@ -303,13 +496,11 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* Gold connecting line decoration */}
               <div style={{ position: 'absolute', top: '30%', left: '30%', width: 1, height: '25%', background: 'linear-gradient(180deg, transparent, rgba(201,168,76,.4), transparent)', zIndex: 1 }} />
             </div>
           </div>
         </div>
 
-        {/* Scroll down indicator */}
         <button onClick={() => document.getElementById('stats-row')?.scrollIntoView({ behavior: 'smooth' })}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 bg-transparent border-none cursor-pointer">
           <span className="font-body text-[10px] text-slate-500 uppercase tracking-[3px]">Scroll</span>
@@ -317,9 +508,7 @@ export default function LandingPage() {
         </button>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          STATS ROW
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* STATS ROW */}
       <section id="stats-row" data-animate
         style={{ background: '#161009', borderTop: '1px solid rgba(201,168,76,.15)', borderBottom: '1px solid rgba(201,168,76,.15)' }}>
         <div className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4">
@@ -338,9 +527,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          TRUSTED BRANDS (marquee)
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* TRUSTED BRANDS */}
       <section className="py-14 px-6 overflow-hidden" style={{ background: '#1C1510' }}>
         <div className="text-center mb-8">
           <span className="font-body text-xs font-semibold uppercase tracking-[3px]" style={{ color: '#C9A84C' }}>Brands We Service</span>
@@ -358,9 +545,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          PHOTO GALLERY — "Our Work"
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* PHOTO GALLERY */}
       <section className="py-20 px-6" style={{ background: '#161009' }}>
         <div className="max-w-6xl mx-auto">
           <div id="gal-h" data-animate className={`text-center mb-12 transition-all duration-700 ${isVis('gal-h') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -377,14 +562,14 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* Asymmetric photo grid */}
+          {/* ✅ FIXED: uses className="gallery-grid" for responsive CSS targeting */}
           <div id="gal-g" data-animate
             className={`transition-all duration-700 ${isVis('gal-g') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
             style={{ transitionDelay: '150ms' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr', gridTemplateRows: '240px 240px', gap: 12 }}>
+            <div className="gallery-grid">
 
-              {/* Large left — spans 2 rows */}
-              <div className="gallery-card relative rounded-2xl overflow-hidden cursor-pointer"
+              {/* ✅ Large left — spans 2 rows on desktop, full-width on tablet, normal on mobile */}
+              <div className="gallery-card gallery-span relative rounded-2xl overflow-hidden cursor-pointer"
                 style={{ gridRow: '1 / 3', border: '1px solid rgba(201,168,76,.12)' }}>
                 <img src={PHOTOS.gallery2} alt="Professional garage"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -437,9 +622,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          SERVICES PREVIEW
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* SERVICES PREVIEW */}
       <section id="preview-services" className="py-20 px-6" style={{ background: '#1C1510' }}>
         <div className="max-w-6xl mx-auto">
           <div id="sv-h" data-animate className={`text-center mb-14 transition-all duration-700 ${isVis('sv-h') ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
@@ -496,9 +679,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          HOW IT WORKS
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* HOW IT WORKS */}
       <section className="py-20 px-6" style={{ background: '#161009' }}>
         <div className="max-w-5xl mx-auto">
           <div id="how-h" data-animate className={`text-center mb-14 transition-all duration-700 ${rev('how-h')}`}>
@@ -513,9 +694,7 @@ export default function LandingPage() {
             <p className="font-body text-slate-400 text-[15px]">From browsing to a fixed car — simple and transparent every step.</p>
           </div>
 
-          {/* Process steps with connecting line */}
           <div className="relative">
-            {/* Connector line (desktop) */}
             <div className="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-px"
               style={{ background: 'linear-gradient(90deg,transparent,rgba(201,168,76,.3),rgba(201,168,76,.3),rgba(201,168,76,.3),transparent)' }} />
 
@@ -526,10 +705,8 @@ export default function LandingPage() {
                   style={{ background: 'linear-gradient(135deg,#2A1E0E,#33250F)', border: '1px solid rgba(201,168,76,.15)', transitionDelay: `${i*80}ms` }}
                   onMouseEnter={e => e.currentTarget.style.borderColor='rgba(201,168,76,.4)'}
                   onMouseLeave={e => e.currentTarget.style.borderColor='rgba(201,168,76,.15)'}>
-                  {/* Step number watermark */}
                   <div className="absolute top-3 right-4 font-tech font-black text-[40px] leading-none select-none"
                     style={{ color: 'rgba(201,168,76,.07)' }}>{step}</div>
-                  {/* Step circle */}
                   <div className="w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-4"
                     style={{ background: 'linear-gradient(135deg,#8B6914,#C9A84C)', boxShadow: '0 4px 16px rgba(201,168,76,.3)' }}>
                     <span className="font-tech font-black text-xs" style={{ color: '#1C1609' }}>{step}</span>
@@ -544,9 +721,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          EMERGENCY BANNER
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* EMERGENCY BANNER */}
       <section className="py-10 px-6"
         style={{ background: 'linear-gradient(135deg,#2A1E0E,#1C1510,#2A1E0E)', borderTop: '1px solid rgba(201,168,76,.2)', borderBottom: '1px solid rgba(201,168,76,.2)' }}>
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
@@ -568,9 +743,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          WHY JK MOTORS
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* WHY JK MOTORS */}
       <section className="py-24 px-6" style={{ background: '#1C1510' }}>
         <div className="max-w-6xl mx-auto">
           <div id="wy-h" data-animate className={`mb-14 transition-all duration-700 ${rev('wy-h')}`}>
@@ -589,8 +762,7 @@ export default function LandingPage() {
                 style={{ background: 'linear-gradient(135deg,#2A1E0E,#33250F)', border: '1px solid rgba(201,168,76,.15)', transitionDelay: `${i*60}ms` }}
                 onMouseEnter={e => e.currentTarget.style.borderColor='rgba(201,168,76,.4)'}
                 onMouseLeave={e => e.currentTarget.style.borderColor='rgba(201,168,76,.15)'}>
-                <div className="text-3xl mb-4"
-                  style={{ filter: 'drop-shadow(0 0 8px rgba(201,168,76,.3))' }}>{icon}</div>
+                <div className="text-3xl mb-4" style={{ filter: 'drop-shadow(0 0 8px rgba(201,168,76,.3))' }}>{icon}</div>
                 <h4 className="font-body font-bold text-white text-[15px] mb-2">{title}</h4>
                 <p className="font-body text-[13px] text-slate-400 leading-relaxed">{desc}</p>
               </div>
@@ -599,9 +771,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          TESTIMONIALS — upgraded with photo avatars & quote marks
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* TESTIMONIALS */}
       <section className="py-24 px-6" style={{ background: '#161009' }}>
         <div className="max-w-6xl mx-auto">
           <div id="test-h" data-animate className={`text-center mb-14 transition-all duration-700 ${rev('test-h')}`}>
@@ -614,8 +784,6 @@ export default function LandingPage() {
               WHAT DRIVERS <span className="text-grad">SAY</span>
             </h2>
             <p className="font-body text-slate-400 text-[15px]">Real reviews from real Toronto drivers.</p>
-
-            {/* Aggregate star display */}
             <div className="flex items-center justify-center gap-2 mt-5">
               {[...Array(5)].map((_,i)=>(
                 <span key={i} style={{ color:'#C9A84C', fontSize: 20 }}>★</span>
@@ -632,23 +800,15 @@ export default function LandingPage() {
                 style={{ background: 'linear-gradient(135deg,#2A1E0E,#33250F)', border: '1px solid rgba(201,168,76,.15)', transitionDelay: `${i*100}ms` }}
                 onMouseEnter={e => e.currentTarget.style.borderColor='rgba(201,168,76,.4)'}
                 onMouseLeave={e => e.currentTarget.style.borderColor='rgba(201,168,76,.15)'}>
-
-                {/* Large decorative quote mark */}
                 <div className="absolute top-4 right-5 font-tech font-black select-none"
                   style={{ fontSize: 72, color: 'rgba(201,168,76,.06)', lineHeight: 1 }}>"</div>
-
-                {/* Stars */}
                 <div className="flex gap-0.5 mb-4">
                   {Array(t.stars).fill(0).map((_,s)=>(
                     <span key={s} style={{ color:'#C9A84C', fontSize: 15 }}>★</span>
                   ))}
                 </div>
-
                 <p className="font-body text-[14px] text-slate-300 leading-relaxed mb-6 relative z-10">"{t.text}"</p>
-
-                {/* Author row */}
                 <div className="flex items-center gap-3">
-                  {/* Initials avatar with gradient */}
                   <div className="w-11 h-11 rounded-full flex items-center justify-center font-body font-bold text-sm flex-shrink-0"
                     style={{ background: `linear-gradient(135deg,${t.color},#C9A84C)`, color: '#1C1510', boxShadow: `0 4px 16px ${t.color}40` }}>
                     {t.initial}
@@ -657,7 +817,6 @@ export default function LandingPage() {
                     <div className="font-body font-semibold text-white text-sm">{t.name}</div>
                     <div className="font-body text-[12px] text-slate-500">{t.car}</div>
                   </div>
-                  {/* Verified badge */}
                   <div className="ml-auto text-[10px] font-body font-semibold px-2 py-1 rounded-full"
                     style={{ background: 'rgba(34,120,80,.15)', border: '1px solid rgba(34,120,80,.25)', color: '#6ee7b7' }}>
                     ✓ Verified
@@ -669,16 +828,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════════════════════════════════
-          CTA — only for guests
-      ═══════════════════════════════════════════════════════════════════════ */}
+      {/* CTA — guests only */}
       {!user && (
         <section className="py-24 px-6 text-center relative overflow-hidden"
           style={{ background: 'linear-gradient(135deg,#161009,#2A1E0E,#161009)', borderTop: '1px solid rgba(201,168,76,.15)' }}>
-          {/* background glow */}
           <div className="glow-orb absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-3xl pointer-events-none"
             style={{ background: 'radial-gradient(circle,rgba(201,168,76,.08) 0%,transparent 65%)' }} />
-
           <div className="max-w-xl mx-auto relative z-10">
             <div className="text-5xl mb-6">🏆</div>
             <h2 className="font-tech font-black text-white mb-4" style={{ fontSize: 'clamp(24px,5vw,48px)' }}>
@@ -697,7 +852,6 @@ export default function LandingPage() {
                 Browse Services
               </Link>
             </div>
-            {/* Trust line */}
             <p className="font-body text-slate-600 text-[12px] mt-8">
               No credit card required · Free to browse · Cancel anytime
             </p>
@@ -707,7 +861,6 @@ export default function LandingPage() {
 
       <SiteFooter />
 
-      {/* Scroll-to-top */}
       {showScrollTop && (
         <button onClick={() => window.scrollTo({ top:0, behavior:'smooth' })}
           className="scroll-top-btn fixed bottom-8 left-1/2 -translate-x-1/2 z-50 w-12 h-12 rounded-full border-none cursor-pointer flex items-center justify-center"
