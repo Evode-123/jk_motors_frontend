@@ -48,15 +48,19 @@ export default function SiteNavbar({ transparent = false }) {
       >
         <div className="max-w-6xl mx-auto flex items-center justify-between h-[70px]">
 
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2.5 no-underline">
-            <img src="/jk_logo.jpeg" alt="JK Motors Logo"
-              className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
-              style={{ boxShadow: '0 0 16px rgba(201,168,76,0.35)', border: '1px solid rgba(201,168,76,0.25)' }} />
-            <div>
-              <div className="snav-font-tech font-black text-base text-white tracking-widest leading-none">JK MOTORS</div>
-              <div className="snav-font-body text-[9px] tracking-[3px] uppercase leading-none" style={{ color: '#C9A84C' }}>Auto Parts & Service</div>
-            </div>
+          {/* Logo — image only, no duplicate text */}
+          <Link to="/" className="flex items-center no-underline">
+            <img
+              src="/jk_logo.jpeg"
+              alt="JK Motors"
+              className="rounded-lg object-cover flex-shrink-0"
+              style={{
+                width: 48,
+                height: 48,
+                boxShadow: '0 0 20px rgba(201,168,76,0.4)',
+                border: '1px solid rgba(201,168,76,0.3)',
+              }}
+            />
           </Link>
 
           {/* Desktop nav links */}
