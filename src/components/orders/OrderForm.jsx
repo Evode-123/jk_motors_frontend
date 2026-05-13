@@ -3,7 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import apiService from '../../services/apiService';
 import { CheckCircle, ChevronRight, ChevronLeft, Car, MapPin, User, Wrench, Loader } from 'lucide-react';
-import { SERVICE_TYPE, FUEL_TYPE, STATIC_BASE_URL } from '../../utils/constants';
+// ✅ FIXED: import getImageUrl instead of STATIC_BASE_URL
+import { SERVICE_TYPE, FUEL_TYPE, getImageUrl } from '../../utils/constants';
 
 const G = {
   gold:        '#C9A84C',
@@ -222,12 +223,18 @@ function StepService({ services, loading, search, onSearch, selectedService, sel
         {services.map(svc => {
           const isSelected = selectedService?.id === svc.id;
           const isOpen     = expanded === svc.id;
+          // ✅ FIXED: use getImageUrl() so Cloudinary URLs work correctly
+          const svcImageUrl = getImageUrl(svc.imageUrl);
           return (
             <div key={svc.id} style={{ borderRadius:12, overflow:'hidden', border:`1px solid ${isSelected?G2.gold:G2.border}`, transition:'border-color 0.2s' }}>
               <button onClick={() => { onSelectService(svc); onSelectProduct(null); setExpanded(isOpen?null:svc.id); }}
                 style={{ width:'100%', display:'flex', alignItems:'center', justifyContent:'space-between', padding:'12px 16px', background:isSelected?'rgba(201,168,76,0.1)':G2.goldDimmer, border:'none', cursor:'pointer', textAlign:'left' }}>
                 <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                  {svc.imageUrl ? <img src={`${STATIC_BASE_URL}${svc.imageUrl}`} alt="" style={{ width:40,height:40,borderRadius:8,objectFit:'cover',flexShrink:0 }} /> : <div style={{ width:40,height:40,borderRadius:8,background:'rgba(201,168,76,0.08)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:18,flexShrink:0 }}>🔧</div>}
+                  {/* ✅ FIXED: was `${STATIC_BASE_URL}${svc.imageUrl}` which broke Cloudinary URLs */}
+                  {svcImageUrl
+                    ? <img src={svcImageUrl} alt={svc.name} style={{ width:40, height:40, borderRadius:8, objectFit:'cover', flexShrink:0 }} />
+                    : <div style={{ width:40, height:40, borderRadius:8, background:'rgba(201,168,76,0.08)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:18, flexShrink:0 }}>🔧</div>
+                  }
                   <div>
                     <p style={{ fontFamily:"'DM Sans',sans-serif", fontWeight:600, color:G2.textPrimary, fontSize:13 }}>{svc.name}</p>
                     <p style={{ fontFamily:"'DM Sans',sans-serif", color:G2.textMuted, fontSize:11 }}>{svc.products?.length??0} products</p>
