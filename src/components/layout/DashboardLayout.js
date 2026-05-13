@@ -11,7 +11,7 @@ import apiService           from '../../services/apiService';
 import { useSessionManager } from '../../hooks/useSessionManager';
 import SessionModal          from '../common/SessionModal';
 
-const WARNING_SECONDS = 5 * 60; // must match useSessionManager WARNING_BEFORE_MS / 1000
+const WARNING_SECONDS = 5 * 60;
 
 const G = {
   gold:       '#C9A84C',
@@ -62,31 +62,6 @@ function UserAvatar({ user, size = 32, fontSize = 12 }) {
   );
 }
 
-function SidebarAvatar({ user }) {
-  const [imgError, setImgError] = useState(false);
-  const getInitials = () => {
-    if (user?.firstName && user?.lastName)
-      return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
-    return user?.email?.charAt(0).toUpperCase() || 'U';
-  };
-  if (user?.avatarUrl && !imgError) {
-    return (
-      <img src={user.avatarUrl} alt={getInitials()} onError={() => setImgError(true)}
-        style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `1.5px solid ${G.goldDim}` }} />
-    );
-  }
-  return (
-    <div style={{
-      width: 36, height: 36, borderRadius: '50%',
-      background: 'linear-gradient(135deg,#8B6914,#C9A84C)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 700, color: '#1C1609', flexShrink: 0,
-    }}>
-      {getInitials()}
-    </div>
-  );
-}
-
 const DashboardLayout = ({ children }) => {
   const { user, logout }  = useAuth();
   const navigate          = useNavigate();
@@ -100,14 +75,11 @@ const DashboardLayout = ({ children }) => {
   const [adminContactUnread,  setAdminContactUnread]  = useState(0);
 
   // ── Session management ─────────────────────────────────────────────────────
-  // onExpire is called when the inactivity countdown hits 0 (not needed here
-  // because the modal already shows "expired" state automatically)
   const handleExtend = useCallback(async () => {
     setExtending(true);
     try {
       await apiService.refreshSession();
     } catch {
-      // refresh failed — treat as expired, log out
       await logout();
       navigate('/login', { replace: true });
     } finally {
@@ -124,21 +96,28 @@ const DashboardLayout = ({ children }) => {
   const sessionModal = useSessionManager({
     isAuthenticated: !!user,
     onExtend:        handleExtend,
-    onExpire:        () => {}, // modal handles it visually
+    onExpire:        () => {},
   });
 
-  // ── Notifications ──────────────────────────────────────────────────────────
+  // ── PERFORMANCE FIX: fetch both unread counts in parallel ─────────────────
+  // Previously these were two separate useEffect calls that ran sequentially.
+  // Now they fire at the same time with Promise.all so they both resolve in
+  // roughly the time it takes for ONE request instead of TWO.
   React.useEffect(() => {
-    if (user?.role === USER_ROLES.ADMIN) {
-      apiService.adminGetFeedbackUnreadCount().then(n => setAdminFeedbackUnread(n)).catch(() => {});
-    }
-  }, [user]);
+    if (user?.role !== USER_ROLES.ADMIN) return;
 
-  React.useEffect(() => {
-    if (user?.role === USER_ROLES.ADMIN) {
-      apiService.adminGetContactUnreadCount().then(n => setAdminContactUnread(n)).catch(() => {});
-    }
-  }, [user]);
+    Promise.all([
+      apiService.adminGetFeedbackUnreadCount(),
+      apiService.adminGetContactUnreadCount(),
+    ])
+      .then(([feedbackCount, contactCount]) => {
+        setAdminFeedbackUnread(feedbackCount);
+        setAdminContactUnread(contactCount);
+      })
+      .catch(() => {
+        // Non-critical — badge counts just won't show if this fails
+      });
+  }, [user?.role]);
 
   const adminMenu = [
     { icon: <LayoutDashboard className="w-5 h-5" />, label: 'Dashboard',        path: '/dashboard' },
@@ -420,7 +399,7 @@ const DashboardLayout = ({ children }) => {
         </div>
       </div>
 
-      {/* ── Session timeout modal — rendered outside the layout flow so it's always on top ── */}
+      {/* Session timeout modal */}
       <SessionModal
         phase={sessionModal.phase}
         countdown={sessionModal.countdown}
